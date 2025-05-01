@@ -1,4 +1,4 @@
- - we're using dotnet 8
+ - we're using dotnet 9
  - we're using C# 12
  - my testing framework is xUnit
  - prefer empty collection
