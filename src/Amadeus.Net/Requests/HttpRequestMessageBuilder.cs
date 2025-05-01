@@ -9,7 +9,7 @@ namespace Amadeus.Net.Requests;
 [SuppressMessage("Design", "CA1001:Types that own disposable fields should be disposable", Justification = "request is returned. caller is responsible for disposal.")]
 public sealed class HttpRequestMessageBuilder(
     HttpMethod method,
-    Uri? uri)
+    string? uri)
 {
     public enum CacheType
     {
@@ -34,7 +34,7 @@ public sealed class HttpRequestMessageBuilder(
     {
     }
 
-    public HttpRequestMessageBuilder(Uri uri)
+    public HttpRequestMessageBuilder(string uri)
         : this(HttpMethod.Get, uri ?? throw new ArgumentNullException(nameof(uri)))
     {
     }
@@ -296,7 +296,7 @@ public sealed class HttpRequestMessageBuilder(
         return this;
     }
 
-    public HttpRequestMessageBuilder AcceptMediaType(string mediaType)
+    public HttpRequestMessageBuilder Accept(string mediaType)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(mediaType);
 

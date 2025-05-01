@@ -1,5 +1,6 @@
 ﻿using Amadeus.Net.Locks;
 using Amadeus.Net.Options;
+using Amadeus.Net.Requests;
 using System.Net.Http.Headers;
 using System.Runtime.CompilerServices;
 using System.Text.Json;
@@ -91,9 +92,7 @@ internal sealed class TokenProvider(
     private async Task<string> RequestTokenAsync(CancellationToken cancellationToken)
     {
         using var request = BuildRequest(CreateContent());
-
         using var response = await httpClient.SendAsync(request, cancellationToken);
-
         var content = await response.Content.ReadAsStringAsync(cancellationToken);
 
         var tokenResponse = !response.IsSuccessStatusCode
@@ -122,18 +121,12 @@ internal sealed class TokenProvider(
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private HttpRequestMessage BuildRequest(FormUrlEncodedContent content)
-    {
-        var message = new HttpRequestMessage(HttpMethod.Post, TokenPath)
-        {
-            Content = content,
-        };
-
-        message.Headers.UserAgent.Add(new ProductInfoHeaderValue(options.ClientName, options.ClientVersion.ToString()));
-        message.Headers.UserAgent.Add(new ProductInfoHeaderValue("dotnet", "9"));
-        message.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("application/vnd.amadeus+json"));
-        message.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
-
-        return message;
-    }
+    private HttpRequestMessage BuildRequest(FormUrlEncodedContent content) =>
+        new HttpRequestMessageBuilder(HttpMethod.Post, TokenPath)
+            .WithContent(content)
+            .WithUserAgent(options.ClientName, options.ClientVersion.ToString())
+            .WithUserAgent("dotnet", "9")
+            .Accept("application/vnd.amadeus+json")
+            .Accept("application/json")
+            .Build();
 }
