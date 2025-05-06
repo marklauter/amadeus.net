@@ -1,4 +1,5 @@
 ﻿using Amadeus.Net.Auth;
+using Amadeus.Net.Clients.AirlineCodeLookup;
 using Amadeus.Net.Options;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -27,7 +28,11 @@ public static class ServiceCollectionExtensions
             .AddTransient<AuthTokenHandler>();
 
         _ = services.AddHttpClient<TokenProvider>(client => client.BaseAddress = options.Host);
+
         _ = services.AddHttpClient<AmadeusClient>(client => client.BaseAddress = options.Host)
+            .AddHttpMessageHandler<AuthTokenHandler>();
+
+        _ = services.AddHttpClient<AirlineCodeLookupClient>(client => client.BaseAddress = options.Host)
             .AddHttpMessageHandler<AuthTokenHandler>();
 
         return services;
