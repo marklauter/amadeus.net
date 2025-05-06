@@ -1,6 +1,6 @@
 ﻿using Amadeus.Net.Options;
+using Amadeus.Net.Requests;
 using Microsoft.Extensions.Logging;
-using System.Net.Http.Headers;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
@@ -22,8 +22,11 @@ public sealed class AmadeusClient(
         CancellationToken cancellationToken)
     {
         using var request = BuildRequest(
+            HttpMethod.Get,
             FlightInpirationPath,
-            [("origin", origin), ("maxPrice", "200")]);
+            [
+                KeyValuePair.Create("origin", origin),
+                KeyValuePair.Create("maxPrice", "200")]);
 
         return await SendAsync(request, cancellationToken);
     }
@@ -51,23 +54,21 @@ public sealed class AmadeusClient(
                 ?? throw new InvalidOperationException($"could not deserialize token response from '{request.RequestUri}', content: {content}");
     }
 
-    private HttpRequestMessage BuildRequest(string path)
-        => BuildRequest(path, null);
+    private HttpRequestMessage BuildRequest(HttpMethod method, string path)
+        => BuildRequest(method, path, null);
 
     private HttpRequestMessage BuildRequest(
+        HttpMethod method,
         string path,
-        (string key, string value)[]? query)
+        IEnumerable<KeyValuePair<string, string>>? query)
     {
-        path = query != null && query.Length > 0
-            ? $"{path}?{String.Join('&', query.Select(kvp => $"{Uri.EscapeDataString(kvp.key)}={Uri.EscapeDataString(kvp.value)}"))}"
-            : path;
-
-        var message = new HttpRequestMessage(HttpMethod.Get, path);
-        message.Headers.UserAgent.Add(new ProductInfoHeaderValue(options.ClientName, options.ClientVersion.ToString()));
-        message.Headers.UserAgent.Add(new ProductInfoHeaderValue("dotnet", "9"));
-        message.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("application/vnd.amadeus+json"));
-        message.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
-
-        return message;
+        var builder = new HttpRequestMessageBuilder(method, path)
+            .WithUserAgent(options.ClientName, options.ClientVersion.ToString())
+            .WithUserAgent("dotnet", "9")
+            .Accept("application/vnd.amadeus+json")
+            .Accept("application/json");
+        return query is not null
+            ? builder.WithQueryParameters(query).Build()
+            : builder.Build();
     }
 }

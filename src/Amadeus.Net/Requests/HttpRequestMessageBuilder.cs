@@ -64,14 +64,7 @@ public sealed class HttpRequestMessageBuilder(
     public HttpRequestMessageBuilder WithQueryParameters(IEnumerable<KeyValuePair<string, string>> parameters)
     {
         ArgumentNullException.ThrowIfNull(parameters);
-
-        foreach (var (key, value) in parameters)
-        {
-            ArgumentException.ThrowIfNullOrEmpty(key);
-            ArgumentException.ThrowIfNullOrEmpty(value);
-
-            queryParameters.Add(KeyValuePair.Create(key, value));
-        }
+        queryParameters.AddRange(parameters);
 
         return this;
     }
@@ -324,7 +317,9 @@ public sealed class HttpRequestMessageBuilder(
     {
         if (queryParameters is { Count: > 0 } && request.RequestUri is not null)
         {
-            request.RequestUri = new Uri($"{request.RequestUri}?{String.Join('&', queryParameters.Select(item => $"{Uri.EscapeDataString(item.Key)}={Uri.EscapeDataString(item.Value)}"))}");
+            request.RequestUri = new Uri(
+                $"{request.RequestUri}?{String.Join('&', queryParameters.Select(item => $"{Uri.EscapeDataString(item.Key)}={Uri.EscapeDataString(item.Value)}"))}",
+                UriKind.Relative);
         }
 
         return request;
