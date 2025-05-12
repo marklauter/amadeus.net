@@ -6,5 +6,5 @@ namespace Amadeus.Net.Clients.AirlineCodeLookup.Models;
 /// Error response
 /// </summary>
 public sealed record ErrorResponse(
-    [property: JsonPropertyName("errors")] IReadOnlyList<Error> Errors);
+    [property: JsonPropertyName("errors")] IEnumerable<Error> Errors);
 

@@ -7,5 +7,5 @@ namespace Amadeus.Net.Clients.AirlineCodeLookup.Models;
 /// </summary>
 public sealed record Airlines(
     [property: JsonPropertyName("meta")] Meta? Meta,
-    [property: JsonPropertyName("warnings")] IReadOnlyList<Warning> Warnings,
-    [property: JsonPropertyName("data")] IReadOnlyList<Airline> Data);
+    [property: JsonPropertyName("warnings")] IEnumerable<Warning> Warnings,
+    [property: JsonPropertyName("data")] IEnumerable<Airline> Data);

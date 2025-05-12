@@ -6,6 +6,35 @@ using System.Text.Json.Serialization;
 
 namespace Amadeus.Net.Clients.AirlineCodeLookup;
 
+public sealed class AirlineQuery
+{
+    private readonly AirlineCodeLookupClient client;
+    private readonly List<string> airlineCodes = [];
+
+    internal AirlineQuery(AirlineCodeLookupClient client) =>
+        this.client = client;
+
+    public AirlineQuery WhereCodeIn(params string[] codes)
+    {
+        airlineCodes.AddRange(codes);
+        return this;
+    }
+
+    public async Task<ApiResponse<List<Airline>, ErrorResponse>> ToListAsync(CancellationToken cancellationToken = default)
+    {
+        var response = await client.GetAirlinesByCodesAsync(airlineCodes, cancellationToken);
+        return response.Select(x => x.Data.ToList());
+    }
+
+    public async Task<ApiResponse<Airline[], ErrorResponse>> ToArrayAsync(CancellationToken cancellationToken = default)
+    {
+        var response = await client.GetAirlinesByCodesAsync(airlineCodes, cancellationToken);
+        return response.Select(x => x.Data.ToArray());
+    }
+
+    // Add more materialization methods as desired, e.g. FirstAsync, SingleAsync, etc.
+}
+
 /// <summary>
 /// Airline Code Lookup API version 1.2.1
 /// </summary>
@@ -25,6 +54,8 @@ public sealed class AirlineCodeLookupClient(
     };
 
     private const string AirlineCodeLookupPath = "/v1/reference-data/airlines";
+
+    public AirlineQuery Airlines => new(this);
 
     public Task<AirlineCodeLookupResponse> GetAirlinesByCodeAsync(
         string airlineCode,

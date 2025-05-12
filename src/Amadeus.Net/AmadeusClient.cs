@@ -1,10 +1,18 @@
-﻿using Amadeus.Net.Options;
+﻿using Amadeus.Net.Clients.AirlineCodeLookup;
+using Amadeus.Net.Options;
 using Amadeus.Net.Requests;
 using Microsoft.Extensions.Logging;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
 namespace Amadeus.Net;
+
+public class AmadeusContext(
+    HttpClient httpClient,
+    AmadeusOptions options)
+{
+    public AirlineQuery Airlines { get; } = new AirlineQuery(new AirlineCodeLookupClient(httpClient, options));
+}
 
 public sealed class AmadeusClient(
     HttpClient httpClient,
