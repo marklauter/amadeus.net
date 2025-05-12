@@ -1,10 +1,12 @@
-﻿using Microsoft.Extensions.Configuration;
+﻿using Amadeus.Net.Clients.FlightInspiration;
+using Amadeus.Net.Clients.LINQ;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using System.Reflection;
 
 namespace Amadeus.Net.Tests;
 
-public class AmadeusClientTests
+public class AmadeusContextTests
 {
     private readonly IConfiguration configuration = new ConfigurationBuilder()
         .AddInMemoryCollection(new Dictionary<string, string>
@@ -16,16 +18,14 @@ public class AmadeusClientTests
         .AddUserSecrets(Assembly.GetExecutingAssembly(), true, false)
         .Build();
 
-    // verifies the amadeus client is registered correctly
     [Fact]
     public void ServiceRegistrationSucceeds()
     {
         using var services = new ServiceCollection()
-            .AddAmadeusClient(configuration)
+            .AddAmadeusContext(configuration)
             .BuildServiceProvider();
 
-        var client = services.GetRequiredService<AmadeusClient>();
-        Assert.NotNull(client);
+        Assert.NotNull(services.GetRequiredService<AmadeusApiContext>());
     }
 
     // proving copilot wrong
@@ -44,11 +44,15 @@ public class AmadeusClientTests
     public async Task FlightInspiration()
     {
         using var services = new ServiceCollection()
-            .AddAmadeusClient(configuration)
+            .AddAmadeusContext(configuration)
             .BuildServiceProvider();
 
-        var client = services.GetRequiredService<AmadeusClient>();
-        var r = await client.ReadFlightInspirationAsync("PAR", CancellationToken.None);
-        Assert.NotNull(r);
+        var context = services.GetRequiredService<AmadeusApiContext>();
+        var destinations = await context
+            .FlightInspirations
+            .Where(() => new FlightInspirationFilter((IataCode)"PAR"))
+            .ToListAsync(f => f.Data, CancellationToken.None);
+
+        Assert.True(destinations.Exists(r => r.Any()));
     }
 }

@@ -1,4 +1,3 @@
-using Amadeus.Net.Clients.AirlineCodeLookup.Models;
 using Amadeus.Net.Clients.Models;
 using LanguageExt;
 using System.Text.Json;
