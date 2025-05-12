@@ -1,6 +1,6 @@
 using System.Text.Json.Serialization;
 
-namespace Amadeus.Net.Clients.AirlineCodeLookup.Models;
+namespace Amadeus.Net.Clients.Models;
 
 /// <summary>
 /// Collection navigation links

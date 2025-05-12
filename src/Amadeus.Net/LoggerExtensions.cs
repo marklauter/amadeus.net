@@ -3,11 +3,9 @@ using System.Diagnostics.CodeAnalysis;
 
 namespace Amadeus.Net;
 
-[SuppressMessage(
-    "Performance",
-    "CA1848:Use the LoggerMessage delegates",
-    Justification = "it's not that big a deal")]
-public static class LoggerExtensions
+[SuppressMessage("Performance", "CA1848:Use the LoggerMessage delegates", Justification = "it's not that big a deal")]
+[SuppressMessage("Usage", "CA2254:Template should be a static expression", Justification = "caller's responsibility")]
+internal static class LoggerExtensions
 {
     public static T Info<T>(
         this ILogger logger,

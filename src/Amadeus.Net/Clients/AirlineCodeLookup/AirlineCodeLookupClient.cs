@@ -1,121 +1,52 @@
-﻿using Amadeus.Net.Clients.AirlineCodeLookup.Models;
+using Amadeus.Net.Clients.AirlineCodeLookup.Models;
+using Amadeus.Net.Clients.LINQ;
+using Amadeus.Net.Clients.Models;
 using Amadeus.Net.Options;
 using Amadeus.Net.Requests;
-using System.Text.Json;
-using System.Text.Json.Serialization;
+using LanguageExt;
 
 namespace Amadeus.Net.Clients.AirlineCodeLookup;
 
-public sealed class AirlineQuery
-{
-    private readonly AirlineCodeLookupClient client;
-    private readonly List<string> airlineCodes = [];
-
-    internal AirlineQuery(AirlineCodeLookupClient client) =>
-        this.client = client;
-
-    public AirlineQuery WhereCodeIn(params string[] codes)
-    {
-        airlineCodes.AddRange(codes);
-        return this;
-    }
-
-    public async Task<ApiResponse<List<Airline>, ErrorResponse>> ToListAsync(CancellationToken cancellationToken = default)
-    {
-        var response = await client.GetAirlinesByCodesAsync(airlineCodes, cancellationToken);
-        return response.Select(x => x.Data.ToList());
-    }
-
-    public async Task<ApiResponse<Airline[], ErrorResponse>> ToArrayAsync(CancellationToken cancellationToken = default)
-    {
-        var response = await client.GetAirlinesByCodesAsync(airlineCodes, cancellationToken);
-        return response.Select(x => x.Data.ToArray());
-    }
-
-    // Add more materialization methods as desired, e.g. FirstAsync, SingleAsync, etc.
-}
-
-/// <summary>
-/// Airline Code Lookup API version 1.2.1
-/// </summary>
-/// <param name="httpClient"></param>
-/// <param name="options"></param>
-/// <param name="logger"></param>
-/// <remarks>
-/// http://www.iata.org/publications/Pages/code-search.aspx
-/// </remarks>
-public sealed class AirlineCodeLookupClient(
+internal sealed class AirlineCodeLookupClient(
     HttpClient httpClient,
     AmadeusOptions options)
 {
-    private static readonly JsonSerializerOptions JsonOptions = new()
-    {
-        Converters = { new JsonStringEnumConverter(JsonNamingPolicy.CamelCase) }
-    };
+    private const string Path = "/v1/reference-data/airlines";
 
-    private const string AirlineCodeLookupPath = "/v1/reference-data/airlines";
+    internal async Task<Either<ErrorResponse, Airlines>> TryGetAirlinesByCodesAsync(
+        Option<IEnumerable<string>> airlineCodes,
+        CancellationToken cancellationToken) =>
+        await airlineCodes
+            .MatchAsync(
+                Some: async codes =>
+                {
+                    using var request = BuildRequest(
+                        HttpMethod.Get,
+                        Path,
+                        KeyValuePair.Create("airlineCodes", string.Join(',', codes.Distinct())));
+                    return await SendAsync(request, cancellationToken);
+                },
+                None: async () =>
+                {
+                    using var request = BuildRequest(HttpMethod.Get, Path);
+                    return await SendAsync(request, cancellationToken);
+                });
 
-    public AirlineQuery Airlines => new(this);
+    internal Task<Either<ErrorResponse, Airlines>> TryGetAllAirlinesAsync(CancellationToken cancellationToken) =>
+        TryGetAirlinesByCodesAsync(Option<IEnumerable<string>>.None, cancellationToken);
 
-    public Task<AirlineCodeLookupResponse> GetAirlinesByCodeAsync(
-        string airlineCode,
-        CancellationToken cancellationToken)
-    {
-        ArgumentException.ThrowIfNullOrWhiteSpace(airlineCode);
-
-        return GetAirlinesByCodesAsync([airlineCode], cancellationToken);
-    }
-
-    public async Task<AirlineCodeLookupResponse> GetAirlinesByCodesAsync(
-        IEnumerable<string> airlineCodes,
-        CancellationToken cancellationToken)
-    {
-        ArgumentNullException.ThrowIfNull(airlineCodes);
-        if (!airlineCodes.Any())
-            throw new ArgumentException("supply at least one airline code", nameof(airlineCodes));
-
-        using var request = BuildRequest(
-            HttpMethod.Get,
-            AirlineCodeLookupPath,
-            [KeyValuePair.Create("airlineCodes", string.Join(',', airlineCodes))]);
-
-        return AirlineCodeLookupResponse.Create(await SendAsync<Airlines, ErrorResponse>(request, cancellationToken));
-    }
-
-    public async Task<AirlineCodeLookupResponse> GetAirlinesAsync(CancellationToken cancellationToken)
-    {
-        using var request = BuildRequest(HttpMethod.Get, AirlineCodeLookupPath);
-        return AirlineCodeLookupResponse.Create(await SendAsync<Airlines, ErrorResponse>(request, cancellationToken));
-    }
-
-    private async Task<(TSuccessResponse? success, TErrorResponse? error)> SendAsync<TSuccessResponse, TErrorResponse>(
+    private async Task<Either<ErrorResponse, Airlines>> SendAsync(
         HttpRequestMessage request,
         CancellationToken cancellationToken)
     {
         using var response = await httpClient.SendAsync(request, cancellationToken);
-        var content = await response.Content.ReadAsStringAsync(cancellationToken);
-
-        return response.IsSuccessStatusCode
-            ? (JsonSerializer.Deserialize<TSuccessResponse>(content, JsonOptions)
-                ?? throw new InvalidOperationException($"Could not deserialize success response from '{request.RequestUri}', content: {content}"), default)
-            : (default, JsonSerializer.Deserialize<TErrorResponse>(content, JsonOptions)
-                ?? throw new InvalidOperationException($"Could not deserialize error response from '{request.RequestUri}', content: {content}"));
+        return await response.TryParseAsync<Airlines>(cancellationToken);
     }
 
     private HttpRequestMessage BuildRequest(
         HttpMethod method,
-        string path) =>
-        new HttpRequestMessageBuilder(method, path)
-            .WithUserAgent(options.ClientName, options.ClientVersion.ToString())
-            .WithUserAgent("dotnet", "9")
-            .Accept("application/vnd.amadeus+json")
-            .Accept("application/json")
-            .Build();
-
-    private HttpRequestMessage BuildRequest(
-        HttpMethod method,
         string path,
-        IEnumerable<KeyValuePair<string, string>> query) =>
+        params KeyValuePair<string, string>[] query) =>
         new HttpRequestMessageBuilder(method, path)
             .WithUserAgent(options.ClientName, options.ClientVersion.ToString())
             .WithUserAgent("dotnet", "9")

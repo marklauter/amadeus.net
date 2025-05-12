@@ -396,4 +396,6 @@ FodyWeavers.xsd
 
 # JetBrains Rider
 *.sln.iml
-/src/Amadeus.Net/ApiSpecs
+
+# local copy of the api specs
+# /src/Amadeus.Net/ApiSpecs

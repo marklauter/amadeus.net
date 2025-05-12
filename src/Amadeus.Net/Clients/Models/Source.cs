@@ -1,7 +1,7 @@
 using System.Diagnostics.CodeAnalysis;
 using System.Text.Json.Serialization;
 
-namespace Amadeus.Net.Clients.AirlineCodeLookup.Models;
+namespace Amadeus.Net.Clients.Models;
 
 /// <summary>
 /// Source of an error or warning

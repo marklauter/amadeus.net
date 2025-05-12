@@ -1,3 +1,4 @@
+using Amadeus.Net.Clients.Models;
 using System.Text.Json.Serialization;
 
 namespace Amadeus.Net.Clients.AirlineCodeLookup.Models;

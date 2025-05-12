@@ -6,7 +6,7 @@ using System.Text.Json;
 
 namespace Amadeus.Net.Requests;
 
-[SuppressMessage("Design", "CA1001:Types that own disposable fields should be disposable", Justification = "request is returned. caller is responsible for disposal.")]
+[SuppressMessage("Design", "CA1001:Types that own disposable fields should be disposable", Justification = "HttpRequestMessage is returned to the caller which is responsible for disposal.")]
 public sealed class HttpRequestMessageBuilder(
     HttpMethod method,
     string? uri)
@@ -27,6 +27,7 @@ public sealed class HttpRequestMessageBuilder(
     private readonly HttpRequestMessage request = new(
         method ?? throw new ArgumentNullException(nameof(method)),
         uri);
+
     private readonly List<KeyValuePair<string, string>> queryParameters = [];
 
     public HttpRequestMessageBuilder()
@@ -51,20 +52,16 @@ public sealed class HttpRequestMessageBuilder(
         return this;
     }
 
-    public HttpRequestMessageBuilder WithQueryParameter(string key, string value)
+    public HttpRequestMessageBuilder WithQueryParameter(KeyValuePair<string, string> parameter)
     {
-        ArgumentException.ThrowIfNullOrEmpty(key);
-        ArgumentException.ThrowIfNullOrEmpty(value);
-
-        queryParameters.Add(KeyValuePair.Create(key, value));
-
+        queryParameters.Add(parameter);
         return this;
     }
 
-    public HttpRequestMessageBuilder WithQueryParameters(IEnumerable<KeyValuePair<string, string>> parameters)
+    public HttpRequestMessageBuilder WithQueryParameters(params KeyValuePair<string, string>[] parameters)
     {
-        ArgumentNullException.ThrowIfNull(parameters);
-        queryParameters.AddRange(parameters);
+        if (parameters.Length > 0)
+            queryParameters.AddRange(parameters);
 
         return this;
     }
@@ -78,9 +75,10 @@ public sealed class HttpRequestMessageBuilder(
         return this;
     }
 
-    public HttpRequestMessageBuilder WithHeaders(IEnumerable<KeyValuePair<string, string>> headers)
+    public HttpRequestMessageBuilder WithHeaders(params KeyValuePair<string, string>[] headers)
     {
-        ArgumentNullException.ThrowIfNull(headers);
+        if (headers.Length == 0)
+            return this;
 
         foreach (var (key, value) in headers)
         {
@@ -111,17 +109,16 @@ public sealed class HttpRequestMessageBuilder(
         return this;
     }
 
-    public HttpRequestMessageBuilder WithFormContent(IEnumerable<KeyValuePair<string, string>> formData)
-    {
-        ArgumentNullException.ThrowIfNull(formData);
-
-        return WithContent(new FormUrlEncodedContent(formData));
-    }
+    public HttpRequestMessageBuilder WithFormContent(params KeyValuePair<string, string>[] formData) =>
+        formData.Length == 0
+        ? this
+        : WithContent(new FormUrlEncodedContent(formData));
 
     [SuppressMessage("IDisposableAnalyzers.Correctness", "IDISP001:Dispose created", Justification = "multipartContent is added to request")]
-    public HttpRequestMessageBuilder WithMultipartContent(IEnumerable<HttpContent> contents)
+    public HttpRequestMessageBuilder WithMultipartContent(params HttpContent[] contents)
     {
-        ArgumentNullException.ThrowIfNull(contents);
+        if (contents.Length == 0)
+            return this;
 
         var multipartContent = new MultipartFormDataContent();
         foreach (var content in contents)
@@ -190,7 +187,7 @@ public sealed class HttpRequestMessageBuilder(
     {
         ArgumentNullException.ThrowIfNull(cookies);
 
-        var newCookies = String.Join("; ", cookies
+        var newCookies = string.Join("; ", cookies
             .Select(ValidateCookie)
             .Select(CreateCookie));
 
@@ -315,11 +312,15 @@ public sealed class HttpRequestMessageBuilder(
 
     public HttpRequestMessage Build()
     {
-        if (queryParameters is { Count: > 0 } && request.RequestUri is not null)
+        if (queryParameters is { Count: > 0 })
         {
-            request.RequestUri = new Uri(
-                $"{request.RequestUri}?{String.Join('&', queryParameters.Select(item => $"{Uri.EscapeDataString(item.Key)}={Uri.EscapeDataString(item.Value)}"))}",
-                UriKind.Relative);
+            request.RequestUri = request.RequestUri is not null
+                ? new Uri(
+                    $"{request.RequestUri}?{string.Join('&', queryParameters.Select(item => $"{Uri.EscapeDataString(item.Key)}={Uri.EscapeDataString(item.Value)}"))}",
+                    UriKind.Relative)
+                : new Uri(
+                    $"?{string.Join('&', queryParameters.Select(item => $"{Uri.EscapeDataString(item.Key)}={Uri.EscapeDataString(item.Value)}"))}",
+                    UriKind.Relative);
         }
 
         return request;

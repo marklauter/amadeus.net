@@ -1,11 +1,11 @@
 using System.Text.Json.Serialization;
 
-namespace Amadeus.Net.Clients.AirlineCodeLookup.Models;
+namespace Amadeus.Net.Clients.Models;
 
 /// <summary>
 /// Error information
 /// </summary>
-public sealed record Error(
+public sealed record ApiError(
     [property: JsonPropertyName("status")] int Status,
     [property: JsonPropertyName("code")] long Code,
     [property: JsonPropertyName("title")] string Title,
