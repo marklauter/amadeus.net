@@ -1,4 +1,5 @@
-﻿using System.Diagnostics.CodeAnalysis;
+﻿using LanguageExt;
+using System.Diagnostics.CodeAnalysis;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using System.Text;
@@ -9,7 +10,7 @@ namespace Amadeus.Net.Requests;
 [SuppressMessage("Design", "CA1001:Types that own disposable fields should be disposable", Justification = "HttpRequestMessage is returned to the caller which is responsible for disposal.")]
 public sealed class HttpRequestMessageBuilder(
     HttpMethod method,
-    string? uri)
+    Option<Uri> uri)
 {
     public enum CacheType
     {
@@ -24,18 +25,19 @@ public sealed class HttpRequestMessageBuilder(
         OnlyIfCached
     }
 
-    private readonly HttpRequestMessage request = new(
-        method ?? throw new ArgumentNullException(nameof(method)),
-        uri);
+    [SuppressMessage("IDisposableAnalyzers.Correctness", "IDISP004:Don't ignore created IDisposable", Justification = "it's not ignored")]
+    private readonly HttpRequestMessage request = uri.Match(
+        Some: uri => new HttpRequestMessage(method ?? throw new ArgumentNullException(nameof(method)), uri),
+        None: new HttpRequestMessage(method ?? throw new ArgumentNullException(nameof(method)), (string?)null));
 
     private readonly List<KeyValuePair<string, string>> queryParameters = [];
 
     public HttpRequestMessageBuilder()
-        : this(HttpMethod.Get, null)
+        : this(HttpMethod.Get, Option<Uri>.None)
     {
     }
 
-    public HttpRequestMessageBuilder(string uri)
+    public HttpRequestMessageBuilder(Uri uri)
         : this(HttpMethod.Get, uri ?? throw new ArgumentNullException(nameof(uri)))
     {
     }
@@ -51,6 +53,9 @@ public sealed class HttpRequestMessageBuilder(
         request.RequestUri = uri ?? throw new ArgumentNullException(nameof(uri));
         return this;
     }
+
+    public HttpRequestMessageBuilder WithQueryParameter(string key, string value) =>
+        WithQueryParameter(KeyValuePair.Create(key, value));
 
     public HttpRequestMessageBuilder WithQueryParameter(KeyValuePair<string, string> parameter)
     {
@@ -179,7 +184,6 @@ public sealed class HttpRequestMessageBuilder(
         }
 
         request.Headers.Add("Cookie", cookies);
-
         return this;
     }
 
@@ -198,7 +202,6 @@ public sealed class HttpRequestMessageBuilder(
         }
 
         request.Headers.Add("Cookie", newCookies);
-
         return this;
     }
 
