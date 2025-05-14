@@ -1,7 +1,7 @@
 using Amadeus.Net.Clients.Models;
 using LanguageExt;
 
-namespace Amadeus.Net.Clients.LINQ;
+namespace Amadeus.Net.ApiContext;
 
 public sealed class EndpointQuery<TResult, TFilter>
 {

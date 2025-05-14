@@ -1,8 +1,9 @@
+using Amadeus.Net.ApiContext;
 using Amadeus.Net.Clients.FlightInspiration.Models;
-using Amadeus.Net.Clients.LINQ;
 using Amadeus.Net.Clients.Models;
 using Amadeus.Net.Options;
 using Amadeus.Net.Requests;
+using Amadeus.Net.Responses;
 using LanguageExt;
 
 namespace Amadeus.Net.Clients.FlightInspiration;

@@ -1,5 +1,5 @@
-﻿using Amadeus.Net.Clients.FlightInspiration;
-using Amadeus.Net.Clients.LINQ;
+﻿using Amadeus.Net.ApiContext;
+using Amadeus.Net.Clients.FlightInspiration;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using System.Reflection;

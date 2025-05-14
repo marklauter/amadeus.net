@@ -3,7 +3,7 @@ using LanguageExt;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
-namespace Amadeus.Net.Clients.LINQ;
+namespace Amadeus.Net.Responses;
 
 internal static class HttpResponseMessageExtensions
 {

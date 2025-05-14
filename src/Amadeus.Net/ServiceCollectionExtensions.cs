@@ -1,7 +1,5 @@
-﻿using Amadeus.Net.Auth;
-using Amadeus.Net.Clients.AirlineCodeLookup;
-using Amadeus.Net.Clients.FlightInspiration;
-using Amadeus.Net.Clients.LINQ;
+﻿using Amadeus.Net.ApiContext;
+using Amadeus.Net.Auth;
 using Amadeus.Net.Options;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -29,17 +27,12 @@ public static class ServiceCollectionExtensions
             .AddSingleton(credentials)
             .AddTransient<AuthTokenHandler>();
 
-        _ = services.AddHttpClient<TokenProvider>(client => client.BaseAddress = options.Host);
+        _ = services
+            .AddHttpClient<TokenProvider>(client => client.BaseAddress = options.Host);
 
-        _ = services.AddHttpClient<AirlineCodeLookupClient>(client => client.BaseAddress = options.Host)
+        _ = services
+            .AddHttpClient<AmadeusContext>(client => client.BaseAddress = options.Host)
             .AddHttpMessageHandler<AuthTokenHandler>();
-
-        _ = services.AddHttpClient<FlightInspirationClient>(client => client.BaseAddress = options.Host)
-            .AddHttpMessageHandler<AuthTokenHandler>();
-
-        _ = services.AddTransient((services) => new AmadeusContext(
-            services.GetRequiredService<AirlineCodeLookupClient>(),
-            services.GetRequiredService<FlightInspirationClient>()));
 
         return services;
     }

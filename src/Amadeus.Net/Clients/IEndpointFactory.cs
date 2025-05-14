@@ -1,4 +1,4 @@
-using Amadeus.Net.Clients.LINQ;
+using Amadeus.Net.ApiContext;
 
 namespace Amadeus.Net.Clients;
 

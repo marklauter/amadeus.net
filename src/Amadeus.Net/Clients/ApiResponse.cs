@@ -78,5 +78,5 @@ public class ApiResponse<TSuccessResponse, TErrorResponse>(
         Func<TSuccessResponse, ApiResponse<TResult, TErrorResponse>> selector) =>
         Data is not null
             ? selector(Data)
-            : new ApiResponse<TResult, TErrorResponse>(default, Error);     
+            : new ApiResponse<TResult, TErrorResponse>(default, Error);
 }

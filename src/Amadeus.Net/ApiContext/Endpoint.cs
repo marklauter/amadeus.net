@@ -1,7 +1,7 @@
 using Amadeus.Net.Clients.Models;
 using LanguageExt;
 
-namespace Amadeus.Net.Clients.LINQ;
+namespace Amadeus.Net.ApiContext;
 
 public sealed class Endpoint<TResult, TFilter>(Func<Option<TFilter>, CancellationToken, Task<Either<ErrorResponse, TResult>>> readFunc)
 {
