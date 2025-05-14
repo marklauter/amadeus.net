@@ -6,9 +6,7 @@ public readonly struct IataCode
 
     private IataCode(string code)
     {
-        if (string.IsNullOrEmpty(code))
-            throw new ArgumentNullException(nameof(code));
-
+        ArgumentException.ThrowIfNullOrWhiteSpace(code);
         if (code.Length != 3)
             throw new ArgumentException("IATA code must be exactly 3 letters.", nameof(code));
 
