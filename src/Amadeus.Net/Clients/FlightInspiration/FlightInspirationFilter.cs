@@ -1,3 +1,4 @@
+using Amadeus.Net.Clients.Models;
 using System.Globalization;
 
 namespace Amadeus.Net.Clients.FlightInspiration;
