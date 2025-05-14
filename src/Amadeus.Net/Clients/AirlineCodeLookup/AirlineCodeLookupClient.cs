@@ -10,8 +10,16 @@ namespace Amadeus.Net.Clients.AirlineCodeLookup;
 internal sealed class AirlineCodeLookupClient(
     HttpClient httpClient,
     AmadeusOptions options)
+    : IEndpointFactory<Airlines, AirlineCodeFilter>
 {
     private const string Path = "/v1/reference-data/airlines";
+
+    public Endpoint<Airlines, AirlineCodeFilter> CreateEndpoint() =>
+        new(
+            (filter, ct) =>
+                filter.Match(
+                    Some: f => TryGetAirlinesByCodesAsync(f.Codes.ToOption(), ct),
+                    None: TryGetAllAirlinesAsync(ct)));
 
     internal async Task<Either<ErrorResponse, Airlines>> TryGetAirlinesByCodesAsync(
         Option<IEnumerable<string>> airlineCodes,

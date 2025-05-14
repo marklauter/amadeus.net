@@ -12,6 +12,14 @@ public sealed record FlightInspirationFilter(
     int? MaxPrice = null
 )
 {
+    public static FlightInspirationFilter From(IataCode origin) => new(origin);
+    public FlightInspirationFilter WithOrigin(IataCode origin) => this with { Origin = origin };
+    public FlightInspirationFilter WithDepartureDate(DepartureDateSelection departureDate) => this with { DepartureDate = departureDate };
+    public FlightInspirationFilter WithOneWay(bool oneWay) => this with { OneWay = oneWay };
+    public FlightInspirationFilter WithTripDuration(int days) => this with { TripDurationDays = days };
+    public FlightInspirationFilter WithNonStop(bool nonStop) => this with { NonStop = nonStop };
+    public FlightInspirationFilter WithMaxPrice(int maxPrice) => this with { MaxPrice = maxPrice };
+
     public IEnumerable<KeyValuePair<string, string>> AsQueryParams()
     {
         yield return KeyValuePair.Create("origin", Origin.ToString());

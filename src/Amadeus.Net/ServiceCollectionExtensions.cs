@@ -37,7 +37,7 @@ public static class ServiceCollectionExtensions
         _ = services.AddHttpClient<FlightInspirationClient>(client => client.BaseAddress = options.Host)
             .AddHttpMessageHandler<AuthTokenHandler>();
 
-        _ = services.AddTransient((services) => new AmadeusApiContext(
+        _ = services.AddTransient((services) => new AmadeusContext(
             services.GetRequiredService<AirlineCodeLookupClient>(),
             services.GetRequiredService<FlightInspirationClient>()));
 

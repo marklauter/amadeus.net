@@ -14,13 +14,6 @@ public sealed class EndpointQuery<TResult, TFilter>
         this.filterFactory = filterFactory;
     }
 
-    public async Task<Either<ErrorResponse, IReadOnlyList<TElement>>> ToListAsync<TElement>(
-        Func<TResult, IReadOnlyList<TElement>> selector, CancellationToken cancellationToken)
-    {
-        var filter = filterFactory();
-        var result = await endpoint.ReadAsync(filter, cancellationToken);
-        return result.Map(selector);
-    }
-
-    // Additional LINQ-like methods (FirstOrDefaultAsync, etc.) can be added here
+    public Task<Either<ErrorResponse, TResult>> ExecuteReaderAsync(CancellationToken cancellationToken) =>
+        endpoint.ReadAsync(filterFactory(), cancellationToken);
 }

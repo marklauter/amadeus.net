@@ -10,8 +10,12 @@ namespace Amadeus.Net.Clients.FlightInspiration;
 internal sealed class FlightInspirationClient(
     HttpClient httpClient,
     AmadeusOptions options)
+    : IEndpointFactory<FlightDestinations, FlightInspirationFilter>
 {
     private const string Path = "/v1/shopping/flight-destinations";
+
+    public Endpoint<FlightDestinations, FlightInspirationFilter> CreateEndpoint() =>
+        new(TryGetFlightInspirationsAsync);
 
     internal async Task<Either<ErrorResponse, FlightDestinations>> TryGetFlightInspirationsAsync(
         Option<FlightInspirationFilter> filter,

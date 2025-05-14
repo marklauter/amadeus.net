@@ -25,7 +25,7 @@ public class AmadeusContextTests
             .AddAmadeusContext(configuration)
             .BuildServiceProvider();
 
-        Assert.NotNull(services.GetRequiredService<AmadeusApiContext>());
+        Assert.NotNull(services.GetRequiredService<AmadeusContext>());
     }
 
     // proving copilot wrong
@@ -47,12 +47,12 @@ public class AmadeusContextTests
             .AddAmadeusContext(configuration)
             .BuildServiceProvider();
 
-        var context = services.GetRequiredService<AmadeusApiContext>();
+        var context = services.GetRequiredService<AmadeusContext>();
         var destinations = await context
             .FlightInspirations
-            .Where(() => new FlightInspirationFilter("PAR"))
-            .ToListAsync(f => f.Data, CancellationToken.None);
+            .FilterBy(() => FlightInspirationFilter.From("PAR"))
+            .ExecuteReaderAsync(CancellationToken.None);
 
-        Assert.True(destinations.Exists(r => r.Any()));
+        Assert.True(destinations.Exists(r => r.Data.Any()));
     }
 }
