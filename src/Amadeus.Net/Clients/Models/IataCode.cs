@@ -1,6 +1,6 @@
-namespace Amadeus.Net.Clients.FlightInspiration;
+namespace Amadeus.Net.Clients.Models;
 
-public sealed record IataCode
+public readonly struct IataCode
 {
     private readonly string value;
 
@@ -8,6 +8,7 @@ public sealed record IataCode
     {
         if (string.IsNullOrEmpty(code))
             throw new ArgumentNullException(nameof(code));
+
         if (code.Length != 3)
             throw new ArgumentException("IATA code must be exactly 3 letters.", nameof(code));
 
@@ -16,5 +17,5 @@ public sealed record IataCode
 
     public override string ToString() => value;
     public static implicit operator string(IataCode code) => code.value;
-    public static explicit operator IataCode(string code) => new(code);
+    public static implicit operator IataCode(string code) => new(code);
 }
