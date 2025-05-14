@@ -50,7 +50,7 @@ public class AmadeusContextTests
         var context = services.GetRequiredService<AmadeusApiContext>();
         var destinations = await context
             .FlightInspirations
-            .Where(() => new FlightInspirationFilter((IataCode)"PAR"))
+            .Where(() => new FlightInspirationFilter("PAR"))
             .ToListAsync(f => f.Data, CancellationToken.None);
 
         Assert.True(destinations.Exists(r => r.Any()));
