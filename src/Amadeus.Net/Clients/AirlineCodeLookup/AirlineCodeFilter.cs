@@ -2,11 +2,11 @@ using LanguageExt;
 
 namespace Amadeus.Net.Clients.AirlineCodeLookup;
 
-public sealed record AirlineCodeFilter(IEnumerable<string> Codes)
+public sealed record AirlineCodeFilter(Option<IEnumerable<string>> Codes)
 {
-    public static Option<AirlineCodeFilter> Some(params string[] codes) =>
-        new AirlineCodeFilter(codes);
+    public static AirlineCodeFilter Some(params string[] codes) =>
+        new(codes);
 
-    public static Option<AirlineCodeFilter> None() =>
-        Option<AirlineCodeFilter>.None;
+    public static AirlineCodeFilter None() =>
+        new(Option<IEnumerable<string>>.None);
 }

@@ -16,11 +16,8 @@ internal sealed class AirlineCodeLookupClient(
     private const string Path = "/v1/reference-data/airlines";
 
     public Endpoint<Airlines, AirlineCodeFilter> CreateEndpoint() =>
-        new(
-            (filter, ct) =>
-                filter.Match(
-                    Some: f => TryGetAirlinesByCodesAsync(f.Codes.ToOption(), ct),
-                    None: TryGetAllAirlinesAsync(ct)));
+        new((filter, cancelationToken) =>
+            TryGetAirlinesByCodesAsync(filter.Codes, cancelationToken));
 
     internal async Task<Either<ErrorResponse, Airlines>> TryGetAirlinesByCodesAsync(
         Option<IEnumerable<string>> airlineCodes,
@@ -40,9 +37,6 @@ internal sealed class AirlineCodeLookupClient(
                     using var request = BuildRequest(HttpMethod.Get, Path);
                     return await SendAsync(request, cancellationToken);
                 });
-
-    internal Task<Either<ErrorResponse, Airlines>> TryGetAllAirlinesAsync(CancellationToken cancellationToken) =>
-        TryGetAirlinesByCodesAsync(Option<IEnumerable<string>>.None, cancellationToken);
 
     private async Task<Either<ErrorResponse, Airlines>> SendAsync(
         HttpRequestMessage request,

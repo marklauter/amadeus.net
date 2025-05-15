@@ -19,18 +19,13 @@ internal sealed class FlightInspirationClient(
         new(TryGetFlightInspirationsAsync);
 
     internal async Task<Either<ErrorResponse, FlightDestinations>> TryGetFlightInspirationsAsync(
-        Option<FlightInspirationFilter> filter,
+        FlightInspirationFilter filter,
         CancellationToken cancellationToken)
     {
-        var queryParams = filter.Match(
-            Some: (f) => f.AsQueryParams().ToArray(),
-            None: () => []
-        );
-
         using var request = BuildRequest(
             HttpMethod.Get,
             Path,
-            queryParams);
+            filter.AsQueryParams());
 
         using var response = await httpClient.SendAsync(request, cancellationToken);
         return await response.TryParseAsync<FlightDestinations>(cancellationToken);
@@ -39,7 +34,7 @@ internal sealed class FlightInspirationClient(
     private HttpRequestMessage BuildRequest(
         HttpMethod method,
         string path,
-        params KeyValuePair<string, string>[] query) =>
+        IEnumerable<KeyValuePair<string, string>> query) =>
         new HttpRequestMessageBuilder(method, new Uri(path))
             .WithUserAgent(options.ClientName, options.ClientVersion.ToString())
             .WithUserAgent("dotnet", "9")
