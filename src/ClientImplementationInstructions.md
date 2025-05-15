@@ -143,7 +143,179 @@ public Endpoint<NewApiResponse, NewApiFilter> NewApi => new NewApiClient(httpCli
 
 ---
 
-## 4. Summary Table
+## 4. Concrete Example: AirlineCodeLookup
+
+Below is a full implementation example for the AirlineCodeLookup endpoint, including all files in the namespace.
+
+### AirlineCodeFilter.cs
+```csharp
+using LanguageExt;
+
+namespace Amadeus.Net.Clients.AirlineCodeLookup;
+
+public sealed record AirlineCodeFilter(IEnumerable<string> Codes)
+{
+    public static Option<AirlineCodeFilter> Some(params string[] codes) =>
+        new AirlineCodeFilter(codes);
+
+    public static Option<AirlineCodeFilter> None() =>
+        Option<AirlineCodeFilter>.None;
+}
+```
+
+### AirlineCodeLookupClient.cs
+```csharp
+using Amadeus.Net.ApiContext;
+using Amadeus.Net.Clients.AirlineCodeLookup.Models;
+using Amadeus.Net.Clients.Models;
+using Amadeus.Net.Options;
+using Amadeus.Net.Requests;
+using Amadeus.Net.Responses;
+using LanguageExt;
+
+namespace Amadeus.Net.Clients.AirlineCodeLookup;
+
+internal sealed class AirlineCodeLookupClient(
+    HttpClient httpClient,
+    AmadeusOptions options)
+    : IEndpointFactory<Airlines, AirlineCodeFilter>
+{
+    private const string Path = "/v1/reference-data/airlines";
+
+    public Endpoint<Airlines, AirlineCodeFilter> CreateEndpoint() =>
+        new(
+            (filter, ct) =>
+                filter.Match(
+                    Some: f => TryGetAirlinesByCodesAsync(f.Codes.ToOption(), ct),
+                    None: TryGetAllAirlinesAsync(ct)));
+
+    internal async Task<Either<ErrorResponse, Airlines>> TryGetAirlinesByCodesAsync(
+        Option<IEnumerable<string>> airlineCodes,
+        CancellationToken cancellationToken) =>
+        await airlineCodes
+            .MatchAsync(
+                Some: async codes =>
+                {
+                    using var request = BuildRequest(
+                        HttpMethod.Get,
+                        Path,
+                        KeyValuePair.Create("airlineCodes", string.Join(',', codes.Distinct())));
+                    return await SendAsync(request, cancellationToken);
+                },
+                None: async () =>
+                {
+                    using var request = BuildRequest(HttpMethod.Get, Path);
+                    return await SendAsync(request, cancellationToken);
+                });
+
+    internal Task<Either<ErrorResponse, Airlines>> TryGetAllAirlinesAsync(CancellationToken cancellationToken) =>
+        TryGetAirlinesByCodesAsync(Option<IEnumerable<string>>.None, cancellationToken);
+
+    private async Task<Either<ErrorResponse, Airlines>> SendAsync(
+        HttpRequestMessage request,
+        CancellationToken cancellationToken)
+    {
+        using var response = await httpClient.SendAsync(request, cancellationToken);
+        return await response.TryParseAsync<Airlines>(cancellationToken);
+    }
+
+    private HttpRequestMessage BuildRequest(
+        HttpMethod method,
+        string path,
+        params KeyValuePair<string, string>[] query) =>
+        new HttpRequestMessageBuilder(method, new Uri(path))
+            .WithUserAgent(options.ClientName, options.ClientVersion.ToString())
+            .WithUserAgent("dotnet", "9")
+            .Accept("application/vnd.amadeus+json")
+            .Accept("application/json")
+            .WithQueryParameters(query)
+            .Build();
+}
+```
+
+### Models/Airline.cs
+```csharp
+using System.Text.Json.Serialization;
+
+namespace Amadeus.Net.Clients.AirlineCodeLookup.Models;
+
+/// <summary>
+/// Represents an airline company with IATA and ICAO codes
+/// </summary>
+public sealed record Airline(
+    [property: JsonPropertyName("type")] string Type,
+    [property: JsonPropertyName("iataCode")] string IataCode,
+    [property: JsonPropertyName("icaoCode")] string IcaoCode,
+    [property: JsonPropertyName("businessName")] string BusinessName,
+    [property: JsonPropertyName("commonName")] string CommonName);
+```
+
+### Models/Airlines.cs
+```csharp
+using Amadeus.Net.Clients.Models;
+using System.Text.Json.Serialization;
+
+namespace Amadeus.Net.Clients.AirlineCodeLookup.Models;
+
+/// <summary>
+/// Response containing airline information
+/// </summary>
+public sealed record Airlines(
+    [property: JsonPropertyName("meta")] Meta? Meta,
+    [property: JsonPropertyName("warnings")] IReadOnlyList<Warning>? Warnings,
+    [property: JsonPropertyName("data")] IReadOnlyList<Airline> Data);
+```
+
+### Models/Links.cs
+```csharp
+using System.Text.Json.Serialization;
+
+namespace Amadeus.Net.Clients.AirlineCodeLookup.Models;
+
+/// <summary>
+/// Collection navigation links
+/// </summary>
+public sealed record Links(
+    [property: JsonPropertyName("self")] string Self = "",
+    [property: JsonPropertyName("next")] string? Next = null,
+    [property: JsonPropertyName("previous")] string? Previous = null,
+    [property: JsonPropertyName("last")] string? Last = null,
+    [property: JsonPropertyName("first")] string? First = null,
+    [property: JsonPropertyName("up")] string? Up = null);
+```
+
+### Models/Meta.cs
+```csharp
+using System.Text.Json.Serialization;
+
+namespace Amadeus.Net.Clients.AirlineCodeLookup.Models;
+
+/// <summary>
+/// Response metadata information
+/// </summary>
+public sealed record Meta(
+    [property: JsonPropertyName("count")] int Count,
+    [property: JsonPropertyName("links")] Links? Links);
+```
+
+### AmadeusContext Registration
+```csharp
+using Amadeus.Net.Clients.AirlineCodeLookup;
+using Amadeus.Net.Clients.AirlineCodeLookup.Models;
+
+public sealed class AmadeusContext(
+    HttpClient httpClient,
+    AmadeusOptions options)
+{
+    private Endpoint<Airlines, AirlineCodeFilter>? airlines;
+    public Endpoint<Airlines, AirlineCodeFilter> Airlines =>
+        airlines ??= new AirlineCodeLookupClient(httpClient, options).CreateEndpoint();
+}
+```
+
+---
+
+## 5. Summary Table
 
 | Step                | Pattern/Requirement                                                                 |
 |---------------------|-------------------------------------------------------------------------------------|
@@ -156,5 +328,3 @@ public Endpoint<NewApiResponse, NewApiFilter> NewApi => new NewApiClient(httpCli
 | Test                | Use DI, chain `.FilterBy(...).ExecuteReaderAsync(...)`                              |
 
 ---
-
-If you need a concrete example for a specific OpenAPI spec, let us know which one and we’ll scaffold it for you!
