@@ -32,9 +32,7 @@ internal sealed class AirportCitySearchClient(
         AirportCitySearchFilter filter,
         CancellationToken cancellationToken)
     {
-        var queryParams = filter.AsQueryParams().ToArray();
-
-        using var request = BuildRequest(HttpMethod.Get, Path, queryParams);
+        using var request = BuildRequest(HttpMethod.Get, Path, filter.AsQueryParams().ToOption());
         using var response = await httpClient.SendAsync(request, cancellationToken);
         return await response.TryParseAsync<AirportCitySearchResponse>(cancellationToken);
     }
@@ -44,7 +42,7 @@ internal sealed class AirportCitySearchClient(
         CancellationToken cancellationToken)
     {
         var path = $"{Path}/{locationId}";
-        using var request = BuildRequest(HttpMethod.Get, path);
+        using var request = BuildRequest(HttpMethod.Get, path, Option<IEnumerable<KeyValuePair<string, string>>>.None);
         using var response = await httpClient.SendAsync(request, cancellationToken);
         return await response.TryParseAsync<Location>(cancellationToken);
     }
@@ -52,7 +50,7 @@ internal sealed class AirportCitySearchClient(
     private HttpRequestMessage BuildRequest(
         HttpMethod method,
         string path,
-        params KeyValuePair<string, string>[] query) =>
+        Option<IEnumerable<KeyValuePair<string, string>>> query) =>
         new HttpRequestMessageBuilder(method, new Uri(path, UriKind.Relative))
             .WithUserAgent(options.ClientName, options.ClientVersion.ToString())
             .WithUserAgent("dotnet", "9")
@@ -61,4 +59,3 @@ internal sealed class AirportCitySearchClient(
             .WithQueryParameters(query)
             .Build();
 }
-
