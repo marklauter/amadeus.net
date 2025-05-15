@@ -10,7 +10,12 @@ public sealed class AmadeusContext(
     HttpClient httpClient,
     AmadeusOptions options)
 {
-    public Endpoint<Airlines, AirlineCodeFilter> Airlines { get; } = new AirlineCodeLookupClient(httpClient, options).CreateEndpoint();
-    public Endpoint<FlightDestinations, FlightInspirationFilter> FlightInspirations { get; } = new FlightInspirationClient(httpClient, options).CreateEndpoint();
+    private Endpoint<Airlines, AirlineCodeFilter>? airlines;
+    public Endpoint<Airlines, AirlineCodeFilter> Airlines =>
+        airlines ??= new AirlineCodeLookupClient(httpClient, options).CreateEndpoint();
+
+    private Endpoint<FlightDestinations, FlightInspirationFilter>? flightInspirations;
+    public Endpoint<FlightDestinations, FlightInspirationFilter> FlightInspirations =>
+        flightInspirations ??= new FlightInspirationClient(httpClient, options).CreateEndpoint();
 }
 
