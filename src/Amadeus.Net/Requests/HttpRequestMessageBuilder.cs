@@ -71,6 +71,14 @@ public sealed class HttpRequestMessageBuilder(
         return this;
     }
 
+    public HttpRequestMessageBuilder WithQueryParameters(IEnumerable<KeyValuePair<string, string>> parameters)
+    {
+        if (parameters.Any())
+            queryParameters.AddRange(parameters);
+
+        return this;
+    }
+
     public HttpRequestMessageBuilder WithHeader(string key, string value)
     {
         ArgumentException.ThrowIfNullOrEmpty(key);
