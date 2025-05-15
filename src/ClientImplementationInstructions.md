@@ -223,7 +223,7 @@ internal sealed class AirlineCodeLookupClient(
         HttpMethod method,
         string path,
         params KeyValuePair<string, string>[] query) =>
-        new HttpRequestMessageBuilder(method, new Uri(path))
+        new HttpRequestMessageBuilder(method, new Uri(path, UriKind.Relative))
             .WithUserAgent(options.ClientName, options.ClientVersion.ToString())
             .WithUserAgent("dotnet", "9")
             .Accept("application/vnd.amadeus+json")

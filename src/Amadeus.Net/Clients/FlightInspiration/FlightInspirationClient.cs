@@ -35,7 +35,7 @@ internal sealed class FlightInspirationClient(
         HttpMethod method,
         string path,
         IEnumerable<KeyValuePair<string, string>> query) =>
-        new HttpRequestMessageBuilder(method, new Uri(path))
+        new HttpRequestMessageBuilder(method, new Uri(path, UriKind.Relative))
             .WithUserAgent(options.ClientName, options.ClientVersion.ToString())
             .WithUserAgent("dotnet", "9")
             .Accept("application/vnd.amadeus+json")

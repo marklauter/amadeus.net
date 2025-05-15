@@ -122,7 +122,7 @@ internal sealed class TokenProvider(
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private HttpRequestMessage BuildRequest(FormUrlEncodedContent content) =>
-        new HttpRequestMessageBuilder(HttpMethod.Post, new Uri(TokenPath))
+        new HttpRequestMessageBuilder(HttpMethod.Post, new Uri(TokenPath, UriKind.Relative))
             .WithContent(content)
             .WithUserAgent(options.ClientName, options.ClientVersion.ToString())
             .WithUserAgent("dotnet", "9")
