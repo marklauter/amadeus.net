@@ -1,10 +1,9 @@
+using Amadeus.Net.Clients.AirportCitySearch.Models;
 using LanguageExt;
 using LanguageExt.UnsafeValueAccess;
 using System.Globalization;
 
 namespace Amadeus.Net.Clients.AirportCitySearch;
-
-using Amadeus.Net.Clients.AirportCitySearch.Models;
 
 public sealed record AirportCitySearchFilter(
     IReadOnlyList<LocationSubType> SubType,

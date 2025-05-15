@@ -11,26 +11,42 @@ namespace Amadeus.Net.Clients.AirportCitySearch;
 internal sealed class AirportCitySearchClient(
     HttpClient httpClient,
     AmadeusOptions options)
-    : IEndpointFactory<AirportCitySearchResponse, AirportCitySearchFilter>
+    : IEndpointFactory<Either<AirportCitySearchResponse, Location>, Either<AirportCitySearchFilter, LocationId>>
 {
     private const string Path = "/v1/reference-data/locations";
 
-    public Endpoint<AirportCitySearchResponse, AirportCitySearchFilter> CreateEndpoint() =>
+    public Endpoint<Either<AirportCitySearchResponse, Location>, Either<AirportCitySearchFilter, LocationId>> CreateEndpoint() =>
         new(TryGetLocationsAsync);
 
-    internal async Task<Either<ErrorResponse, AirportCitySearchResponse>> TryGetLocationsAsync(
+    internal async Task<Either<ErrorResponse, Either<AirportCitySearchResponse, Location>>> TryGetLocationsAsync(
+        Either<AirportCitySearchFilter, LocationId> filter,
+        CancellationToken cancellationToken) =>
+        await filter.Match(
+            async filter => (await TryGetLocationsAsync(filter, cancellationToken))
+                .Map<Either<AirportCitySearchResponse, Location>>(response => response),
+            async id => (await TryGetLocationsAsync(id, cancellationToken))
+                .Map<Either<AirportCitySearchResponse, Location>>(location => location)
+        );
+
+    private async Task<Either<ErrorResponse, AirportCitySearchResponse>> TryGetLocationsAsync(
         AirportCitySearchFilter filter,
         CancellationToken cancellationToken)
     {
         var queryParams = filter.AsQueryParams().ToArray();
 
-        using var request = BuildRequest(
-            HttpMethod.Get,
-            Path,
-            queryParams);
-
+        using var request = BuildRequest(HttpMethod.Get, Path, queryParams);
         using var response = await httpClient.SendAsync(request, cancellationToken);
         return await response.TryParseAsync<AirportCitySearchResponse>(cancellationToken);
+    }
+
+    internal async Task<Either<ErrorResponse, Location>> TryGetLocationsAsync(
+        LocationId locationId,
+        CancellationToken cancellationToken)
+    {
+        var path = $"{Path}/{locationId}";
+        using var request = BuildRequest(HttpMethod.Get, path);
+        using var response = await httpClient.SendAsync(request, cancellationToken);
+        return await response.TryParseAsync<Location>(cancellationToken);
     }
 
     private HttpRequestMessage BuildRequest(
