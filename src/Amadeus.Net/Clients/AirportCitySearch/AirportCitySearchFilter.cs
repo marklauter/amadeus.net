@@ -1,38 +1,42 @@
-using Amadeus.Net.Clients.AirportCitySearch.Models;
+using Amadeus.Net.Clients.AirportCitySearch.Response;
 using LanguageExt;
-using LanguageExt.UnsafeValueAccess;
 using System.Globalization;
 
 namespace Amadeus.Net.Clients.AirportCitySearch;
 
 public sealed record AirportCitySearchFilter(
-    IReadOnlyList<LocationSubType> SubType,
-    string Keyword,
+    Seq<LocationType> Locations,
+    string StartsWith,
+    // Country code of the location using [ISO 3166-1 alpha-2](https://en.wikipedia.org/wiki/ISO_3166-1_alpha-2) code format (e.g. US).
     Option<string> CountryCode,
     Option<int> PageLimit,
     Option<int> PageOffset,
-    Option<SortType> Sort,
+    bool Sorted,
     Option<ViewType> View)
 {
-    public static AirportCitySearchFilter Create(
-        IReadOnlyList<LocationSubType> subType,
-        string keyword) =>
-        new(subType, keyword, Option<string>.None, Option<int>.None, Option<int>.None, Option<SortType>.None, Option<ViewType>.None);
+    public static AirportCitySearchFilter From(string keyword) =>
+        new([], keyword, Option<string>.None, Option<int>.None, Option<int>.None, false, Option<ViewType>.None);
+    public AirportCitySearchFilter WithAirports() => IncludeLocationType(LocationType.Airport);
+    public AirportCitySearchFilter WithCities() => IncludeLocationType(LocationType.City);
+    public AirportCitySearchFilter WithPointsOfInterest() => IncludeLocationType(LocationType.PointOfInterest);
+    public AirportCitySearchFilter WithDistricts() => IncludeLocationType(LocationType.District);
+    private AirportCitySearchFilter IncludeLocationType(LocationType location) => this with { Locations = Locations.Add(location) };
 
-    public IEnumerable<KeyValuePair<string, string>> AsQueryParams()
-    {
-        yield return KeyValuePair.Create("subType", string.Join(",", SubType.Select(s => s.ToString().ToUpperInvariant())));
-        yield return KeyValuePair.Create("keyword", Keyword);
-        if (CountryCode.IsSome)
-            yield return KeyValuePair.Create("countryCode", CountryCode.ValueUnsafe());
-        if (PageLimit.IsSome)
-            yield return KeyValuePair.Create("page[limit]", PageLimit.ValueUnsafe().ToString(CultureInfo.InvariantCulture));
-        if (PageOffset.IsSome)
-            yield return KeyValuePair.Create("page[offset]", PageOffset.ValueUnsafe().ToString(CultureInfo.InvariantCulture));
-        if (Sort.IsSome)
-            yield return KeyValuePair.Create("sort", Sort.ValueUnsafe().ToString().Replace("_", ".").ToLowerInvariant());
-        if (View.IsSome)
-            yield return KeyValuePair.Create("view", View.ValueUnsafe().ToString().ToUpperInvariant());
-    }
+    public AirportCitySearchFilter WithCountryCode(string code) => this with { CountryCode = code };
+    public AirportCitySearchFilter Take(int take) => this with { PageLimit = take };
+    public AirportCitySearchFilter Skip(int skip) => this with { PageOffset = skip };
+    public AirportCitySearchFilter Sort() => this with { Sorted = true };
+    public AirportCitySearchFilter WithView(ViewType view) => this with { View = view };
+
+    public Seq<KeyValuePair<string, string>> AsQuery() =>
+        Prelude.Seq(
+            Prelude.Some(KeyValuePair.Create("subType", string.Join(",", Locations.Distinct().Select(s => s.ToString().ToUpperInvariant())))),
+            Prelude.Some(KeyValuePair.Create("keyword", StartsWith)),
+            CountryCode.Map(code => KeyValuePair.Create("countryCode", code)),
+            PageLimit.Map(limit => KeyValuePair.Create("page[limit]", limit.ToString(CultureInfo.InvariantCulture))),
+            PageOffset.Map(offset => KeyValuePair.Create("page[offset]", offset.ToString(CultureInfo.InvariantCulture))),
+            Sorted ? Prelude.Some(KeyValuePair.Create("sort", "analytics.travelers.score")) : Prelude.None,
+            View.Map(viewType => KeyValuePair.Create("view", viewType.ToString().ToUpperInvariant())))
+        .Choose(option => option);
 }
 

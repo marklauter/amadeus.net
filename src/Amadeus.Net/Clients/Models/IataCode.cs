@@ -1,6 +1,6 @@
 namespace Amadeus.Net.Clients.Models;
 
-public readonly struct IataCode
+public readonly record struct IataCode
 {
     private readonly string value;
 

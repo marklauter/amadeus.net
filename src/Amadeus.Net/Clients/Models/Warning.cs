@@ -2,9 +2,6 @@ using System.Text.Json.Serialization;
 
 namespace Amadeus.Net.Clients.Models;
 
-/// <summary>
-/// Warning information
-/// </summary>
 public sealed record Warning(
     [property: JsonPropertyName("code")] long Code,
     [property: JsonPropertyName("title")] string Title,

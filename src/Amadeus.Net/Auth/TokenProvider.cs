@@ -1,6 +1,6 @@
 ﻿using Amadeus.Net.Locks;
 using Amadeus.Net.Options;
-using Amadeus.Net.Requests;
+using Amadeus.Net.HttpClientExtensions;
 using System.Net.Http.Headers;
 using System.Runtime.CompilerServices;
 using System.Text.Json;

@@ -1,9 +1,9 @@
 using Amadeus.Net.ApiContext;
-using Amadeus.Net.Clients.FlightInspiration.Models;
+using Amadeus.Net.Clients.FlightInspiration.Response;
 using Amadeus.Net.Clients.Models;
+using Amadeus.Net.HttpClientExtensions;
 using Amadeus.Net.Options;
-using Amadeus.Net.Requests;
-using Amadeus.Net.Responses;
+using Amadeus.Net.HttpClientExtensions;
 using LanguageExt;
 
 namespace Amadeus.Net.Clients.FlightInspiration;
@@ -11,30 +11,30 @@ namespace Amadeus.Net.Clients.FlightInspiration;
 internal sealed class FlightInspirationClient(
     HttpClient httpClient,
     AmadeusOptions options)
-    : IEndpointFactory<FlightDestinations, FlightInspirationFilter>
+    : IEndpointFactory<FlightInspirationResponse, FlightInspirationFilter>
 {
     private const string Path = "/v1/shopping/flight-destinations";
 
-    public Endpoint<FlightDestinations, FlightInspirationFilter> CreateEndpoint() =>
+    public Endpoint<FlightInspirationResponse, FlightInspirationFilter> CreateEndpoint() =>
         new(TryGetFlightInspirationsAsync);
 
-    internal async Task<Either<ErrorResponse, FlightDestinations>> TryGetFlightInspirationsAsync(
+    internal async Task<Either<ErrorResponse, FlightInspirationResponse>> TryGetFlightInspirationsAsync(
         FlightInspirationFilter filter,
         CancellationToken cancellationToken)
     {
         using var request = BuildRequest(
             HttpMethod.Get,
             Path,
-            filter.AsQueryParams());
+            filter.AsQuery());
 
         using var response = await httpClient.SendAsync(request, cancellationToken);
-        return await response.TryParseAsync<FlightDestinations>(cancellationToken);
+        return await response.TryParseAsync<FlightInspirationResponse>(cancellationToken);
     }
 
     private HttpRequestMessage BuildRequest(
         HttpMethod method,
         string path,
-        IEnumerable<KeyValuePair<string, string>> query) =>
+        Seq<KeyValuePair<string, string>> query) =>
         new HttpRequestMessageBuilder(method, new Uri(path, UriKind.Relative))
             .WithUserAgent(options.ClientName, options.ClientVersion.ToString())
             .WithUserAgent("dotnet", "9")

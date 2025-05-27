@@ -1,4 +1,4 @@
-using Amadeus.Net.Requests;
+using Amadeus.Net.HttpClientExtensions;
 using LanguageExt;
 
 namespace Amadeus.Net.Clients.AirportCitySearch;
@@ -7,10 +7,10 @@ public static class HttpRequestMessageBuilderExtensions
 {
     public static HttpRequestMessageBuilder WithQueryParameters(
         this HttpRequestMessageBuilder builder,
-        Option<IEnumerable<KeyValuePair<string, string>>> query) =>
+        Seq<KeyValuePair<string, string>> query) =>
         query.Match(
-            Some: builder.WithQueryParameters,
-            None: () => builder
+            Empty: () => builder,
+            Seq: builder.WithQueryParameters
         );
 }
 

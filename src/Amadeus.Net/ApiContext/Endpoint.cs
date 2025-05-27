@@ -8,7 +8,7 @@ public sealed class Endpoint<TResult, TFilter>(Func<TFilter, CancellationToken, 
     private readonly Func<TFilter, CancellationToken, Task<Either<ErrorResponse, TResult>>> readFunc =
         readFunc ?? throw new ArgumentNullException(nameof(readFunc));
 
-    public EndpointQuery<TResult, TFilter> FilterBy(Func<TFilter> filterFactory) =>
+    public EndpointQuery<TResult, TFilter> Filter(Func<TFilter> filterFactory) =>
         new(this, filterFactory);
 
     internal Task<Either<ErrorResponse, TResult>> ReadAsync(TFilter filter, CancellationToken cancellationToken) =>

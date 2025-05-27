@@ -50,9 +50,9 @@ public class AmadeusContextTests
         var context = services.GetRequiredService<AmadeusContext>();
         var destinations = await context
             .FlightInspirations
-            .FilterBy(() => FlightInspirationFilter.From("PAR"))
+            .Filter(() => FlightInspirationFilter.From("PAR"))
             .ExecuteReaderAsync(CancellationToken.None);
 
-        Assert.True(destinations.Exists(r => r.Data.Any()));
+        Assert.True(destinations.Exists(r => r.Destinations.Any()));
     }
 }

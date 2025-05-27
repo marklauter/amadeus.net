@@ -1,6 +1,5 @@
 using Amadeus.Net.Clients.Models;
 using LanguageExt;
-using LanguageExt.UnsafeValueAccess;
 using System.Globalization;
 
 namespace Amadeus.Net.Clients.FlightInspiration;
@@ -21,31 +20,19 @@ public sealed record FlightInspirationFilter(
         Option<bool>.None,
         Option<int>.None);
 
-    public FlightInspirationFilter WithOrigin(IataCode origin) => this with { Origin = origin };
-    public FlightInspirationFilter WithDepartureDate(TravelDates travelDates) => this with { TravelDates = travelDates };
+    public FlightInspirationFilter WithTravelDates(TravelDates travelDates) => this with { TravelDates = travelDates };
     public FlightInspirationFilter WithOneWay(bool oneWay) => this with { OneWay = oneWay };
     public FlightInspirationFilter WithTripDuration(int days) => this with { TripDurationDays = days };
     public FlightInspirationFilter WithNonStop(bool nonStop) => this with { NonStop = nonStop };
     public FlightInspirationFilter WithMaxPrice(int maxPrice) => this with { MaxPrice = maxPrice };
 
-    public IEnumerable<KeyValuePair<string, string>> AsQueryParams()
-    {
-        yield return KeyValuePair.Create("origin", Origin.ToString());
-
-        if (TravelDates.IsSome)
-            yield return KeyValuePair.Create("departureDate", TravelDates.ValueUnsafe().ToString());
-
-        if (OneWay.IsSome)
-            yield return KeyValuePair.Create("oneWay", OneWay.ValueUnsafe().ToString().ToLowerInvariant());
-
-        if (TripDurationDays.IsSome)
-            yield return KeyValuePair.Create("duration", TripDurationDays.ValueUnsafe().ToString(CultureInfo.InvariantCulture));
-
-        if (NonStop.IsSome)
-            yield return KeyValuePair.Create("nonStop", NonStop.ValueUnsafe().ToString().ToLowerInvariant());
-
-        if (MaxPrice.IsSome)
-            yield return KeyValuePair.Create("maxPrice", MaxPrice.ValueUnsafe().ToString(CultureInfo.InvariantCulture));
-    }
+    public Seq<KeyValuePair<string, string>> AsQuery() =>
+        Prelude.Seq(
+            Prelude.Some(KeyValuePair.Create("origin", Origin.ToString())),
+            TravelDates.Map(dates => KeyValuePair.Create("departureDate", dates.ToString())),
+            OneWay.Map(oneWay => KeyValuePair.Create("oneWay", oneWay.ToString().ToLowerInvariant())),
+            TripDurationDays.Map(duration => KeyValuePair.Create("duration", duration.ToString(CultureInfo.InvariantCulture))),
+            NonStop.Map(nonStop => KeyValuePair.Create("nonStop", nonStop.ToString().ToLowerInvariant())),
+            MaxPrice.Map(price => KeyValuePair.Create("maxPrice", price.ToString(CultureInfo.InvariantCulture))))
+        .Choose(option => option);
 }
-
