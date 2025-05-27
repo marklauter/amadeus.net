@@ -9,25 +9,15 @@ namespace Amadeus.Net.Clients.FlightInspiration;
 internal sealed class FlightInspirationClient(
     HttpClient httpClient,
     AmadeusOptions options)
-//: IEndpointFactory<FlightInspirationResponse, FlightInspirationFilter>
 {
     private const string Path = "/v1/shopping/flight-destinations";
 
-    //public Endpoint<FlightInspirationResponse, FlightInspirationFilter> CreateEndpoint() =>
-    //    new(TryGetFlightInspirationsAsync);
-
-    internal async Task<Either<ErrorResponse, FlightInspirationResponse>> TryGetFlightInspirationsAsync(
-        FlightInspirationFilter filter,
-        CancellationToken cancellationToken)
-    {
-        using var request = BuildRequest(
-            HttpMethod.Get,
-            Path,
-            filter.AsQuery());
-
-        using var response = await httpClient.SendAsync(request, cancellationToken);
-        return await response.TryParseAsync<FlightInspirationResponse>(cancellationToken);
-    }
+    internal IO<Either<ErrorResponse, FlightInspirationResponse>> Filter(
+        FlightInspirationFilter filter) =>
+            Prelude.use(
+                acquire: () => BuildRequest(HttpMethod.Get, Path, filter.AsQuery()),
+                release: request => request.Dispose())
+                .Bind(httpClient.GetIO<FlightInspirationResponse>);
 
     private HttpRequestMessage BuildRequest(
         HttpMethod method,

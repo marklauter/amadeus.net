@@ -22,7 +22,7 @@ internal sealed class AirportCitySearchClient(
         MapResult(Prelude.use(
             acquire: () => BuildRequest(HttpMethod.Get, Path, filter.AsQuery()),
             release: request => request.Dispose())
-            .Bind(ReadLocations<AirportCitySearchResponse>));
+            .Bind(httpClient.GetIO<AirportCitySearchResponse>));
 
     private static IO<Either<ErrorResponse, Either<AirportCitySearchResponse, Location>>> MapResult(
         IO<Either<ErrorResponse, AirportCitySearchResponse>> responseIO) =>
@@ -34,19 +34,13 @@ internal sealed class AirportCitySearchClient(
         MapResult(Prelude.use(
             acquire: () => BuildRequest(HttpMethod.Get, $"{Path}/{locationId}", []),
             release: request => request.Dispose())
-            .Bind(ReadLocations<Location>));
+            .Bind(httpClient.GetIO<Location>));
 
     private static IO<Either<ErrorResponse, Either<AirportCitySearchResponse, Location>>> MapResult(
         IO<Either<ErrorResponse, Location>> locationIO) =>
         locationIO.Map(eitherLocation =>
             eitherLocation.Map<Either<AirportCitySearchResponse, Location>>(location =>
                 location));
-
-    private IO<Either<ErrorResponse, T>> ReadLocations<T>(HttpRequestMessage request) =>
-        Prelude.use(
-            acquire: httpClient.SendIO(request),
-            release: response => response.Dispose())
-            .Bind(response => response.Parse<T>());
 
     private HttpRequestMessage BuildRequest(
         HttpMethod method,

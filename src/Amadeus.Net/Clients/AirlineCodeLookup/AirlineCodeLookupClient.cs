@@ -9,28 +9,15 @@ namespace Amadeus.Net.Clients.AirlineCodeLookup;
 internal sealed class AirlineCodeLookupClient(
     HttpClient httpClient,
     AmadeusOptions options)
-//: IEndpointFactory<AirlineLookupResponse, AirlineCodeFilter>
 {
     private const string Path = "/v1/reference-data/airlines";
 
-    //public Endpoint<AirlineLookupResponse, AirlineCodeFilter> CreateEndpoint() =>
-    //    new(TryGetAirlinesByCodesAsync);
-
-    internal async Task<Either<ErrorResponse, AirlineLookupResponse>> TryGetAirlinesByCodesAsync(
-        AirlineCodeFilter filter,
-        CancellationToken cancellationToken)
-    {
-        using var request = BuildRequest(HttpMethod.Get, Path, filter.AsQuery());
-        return await SendAsync(request, cancellationToken);
-    }
-
-    private async Task<Either<ErrorResponse, AirlineLookupResponse>> SendAsync(
-        HttpRequestMessage request,
-        CancellationToken cancellationToken)
-    {
-        using var response = await httpClient.SendAsync(request, cancellationToken);
-        return await response.TryParseAsync<AirlineLookupResponse>(cancellationToken);
-    }
+    internal IO<Either<ErrorResponse, AirlineLookupResponse>> Filter(
+        AirlineCodeFilter filter) =>
+        Prelude.use(
+            acquire: () => BuildRequest(HttpMethod.Get, Path, filter.AsQuery()),
+            release: request => request.Dispose())
+            .Bind(httpClient.GetIO<AirlineLookupResponse>);
 
     private HttpRequestMessage BuildRequest(
         HttpMethod method,
