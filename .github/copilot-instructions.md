@@ -1,6 +1,6 @@
  - we're using dotnet 9
  - we're using C# 13
- - we're using the language-ext library version 5
+ - we're using the language-ext (LanguageExt) library version 5
  - my testing framework is xUnit
  - prefer empty collection
  - prefer var

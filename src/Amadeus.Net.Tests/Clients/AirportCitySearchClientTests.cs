@@ -49,33 +49,6 @@ public sealed class AirportCitySearchClientTests
     }
 
     [Fact]
-    public async Task FilterTest()
-    {
-        var tkn = CancellationToken.None;
-        var response =
-            await Prelude.use(
-                acquire: CreateFilterTestServiceProvider,
-                release: provider => provider.Dispose())
-            .Map(provider => provider.GetRequiredService<AirportCitySearchClient>())
-            .Bind(client => client.Filter(AirportCitySearchFilter
-                .From("MUC")
-                .WithAirports()
-                .WithCities()))
-            .GetAsync(tkn);
-
-        _ = response.Match(
-            Left: error => Assert.Fail("expected success"),
-            Right: e =>
-                _ = e.Match(
-                    Left: x =>
-                    {
-                        Assert.Equal(2, x.Data.Count);
-                        Assert.NotEmpty(x.Data.Select(l => l.Name.Equals("Munich", StringComparison.OrdinalIgnoreCase)));
-                    },
-                    Right: y => Assert.Fail("expected city search response")));
-    }
-
-    [Fact]
     public async Task ContextTest()
     {
         var tkn = CancellationToken.None;
@@ -94,13 +67,10 @@ public sealed class AirportCitySearchClientTests
 
         _ = response.Match(
             Left: error => Assert.Fail("expected success"),
-            Right: e =>
-                _ = e.Match(
-                    Left: x =>
-                    {
-                        Assert.Equal(2, x.Data.Count);
-                        Assert.NotEmpty(x.Data.Select(l => l.Name.Equals("Munich", StringComparison.OrdinalIgnoreCase)));
-                    },
-                    Right: y => Assert.Fail("expected city search response")));
+            Right: r =>
+                {
+                    Assert.Equal(2, r.Data.Count);
+                    Assert.NotEmpty(r.Data.Select(l => l.Name.Equals("Munich", StringComparison.OrdinalIgnoreCase)));
+                });
     }
 }

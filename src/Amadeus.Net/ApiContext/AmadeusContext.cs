@@ -14,22 +14,25 @@ public sealed class AmadeusContext(
     HttpClient httpClient,
     AmadeusOptions options)
 {
-    private Endpoint<AirlineCodeFilter, AirlineLookupResponse>? airlines;
-    public Endpoint<AirlineCodeFilter, AirlineLookupResponse> Airlines =>
-        airlines ??= new Endpoint<AirlineCodeFilter, AirlineLookupResponse>(
-            operation: filter => httpClient.Filter<AirlineCodeFilter, AirlineLookupResponse>(
-                options,
-                AirlineCodeLookupClient.Path,
-                filter));
+    private readonly Lazy<Endpoint<AirlineCodeFilter, AirlineLookupResponse>> airlines =
+        new(() =>
+            new Endpoint<AirlineCodeFilter, AirlineLookupResponse>(
+                operation: filter => httpClient.Filter<AirlineCodeFilter, AirlineLookupResponse>(
+                    options,
+                    AirlineCodeLookupClient.Path,
+                    filter)));
+    public Endpoint<AirlineCodeFilter, AirlineLookupResponse> Airlines => airlines.Value;
 
-    private Endpoint<FlightInspirationFilter, FlightInspirationResponse>? flightInspirations;
-    public Endpoint<FlightInspirationFilter, FlightInspirationResponse> FlightInspirations =>
-        flightInspirations ??= new Endpoint<FlightInspirationFilter, FlightInspirationResponse>(
-            operation: filter => httpClient.Filter<FlightInspirationFilter, FlightInspirationResponse>(
-                options,
-                FlightInspirationClient.Path,
-                filter));
+    private readonly Lazy<Endpoint<FlightInspirationFilter, FlightInspirationResponse>> flightInspirations =
+        new(() =>
+            new Endpoint<FlightInspirationFilter, FlightInspirationResponse>(
+                operation: filter => httpClient.Filter<FlightInspirationFilter, FlightInspirationResponse>(
+                    options,
+                    FlightInspirationClient.Path,
+                    filter)));
+    public Endpoint<FlightInspirationFilter, FlightInspirationResponse> FlightInspirations => flightInspirations.Value;
 
+    // todo: make lazy
     private Endpoint<AirportCitySearchFilter, AirportCitySearchResponse>? airportCities;
     public Endpoint<AirportCitySearchFilter, AirportCitySearchResponse> AirportCities =>
         airportCities ??=
