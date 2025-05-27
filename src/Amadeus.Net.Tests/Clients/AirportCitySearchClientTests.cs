@@ -1,7 +1,5 @@
 ﻿using Amadeus.Net.ApiContext;
-using Amadeus.Net.Auth;
 using Amadeus.Net.Clients.AirportCitySearch;
-using Amadeus.Net.Options;
 using LanguageExt;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -21,33 +19,6 @@ public sealed class AirportCitySearchClientTests
         .AddUserSecrets(Assembly.GetExecutingAssembly(), true, false)
         .Build();
 
-    private ServiceProvider CreateFilterTestServiceProvider()
-    {
-        var options = configuration
-            .GetRequiredSection(AmadeusOptions.SectionName)
-            .Get<AmadeusOptions>()
-            ?? throw new InvalidOperationException($"can't read {nameof(AmadeusOptions)} in section {AmadeusOptions.SectionName}");
-
-        var credentials = configuration
-            .GetRequiredSection(nameof(AmadeusCredentials))
-            .Get<AmadeusCredentials>()
-            ?? throw new InvalidOperationException($"can't read {nameof(AmadeusCredentials)} in section {nameof(AmadeusCredentials)}");
-
-        var services = new ServiceCollection()
-            .AddSingleton(options)
-            .AddSingleton(credentials)
-            .AddTransient<AuthTokenHandler>();
-
-        _ = services
-            .AddHttpClient<TokenProvider>(client => client.BaseAddress = options.Host);
-
-        _ = services
-            .AddHttpClient<AirportCitySearchClient>(client => client.BaseAddress = options.Host)
-            .AddHttpMessageHandler<AuthTokenHandler>();
-
-        return services.BuildServiceProvider();
-    }
-
     [Fact]
     public async Task ContextTest()
     {
@@ -63,14 +34,14 @@ public sealed class AirportCitySearchClientTests
                 .From("MUC")
                 .WithAirports()
                 .WithCities()))
-            .GetAsync(tkn);
+            .InvokeAsync(tkn);
 
         _ = response.Match(
             Left: error => Assert.Fail("expected success"),
             Right: r =>
                 {
-                    Assert.Equal(2, r.Data.Count);
-                    Assert.NotEmpty(r.Data.Select(l => l.Name.Equals("Munich", StringComparison.OrdinalIgnoreCase)));
+                    Assert.Equal(2, r.Locations.Count);
+                    Assert.NotEmpty(r.Locations.Select(l => l.Name.Equals("Munich", StringComparison.OrdinalIgnoreCase)));
                 });
     }
 }
