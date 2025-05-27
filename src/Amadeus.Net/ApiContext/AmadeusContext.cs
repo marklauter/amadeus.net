@@ -17,7 +17,7 @@ public sealed class AmadeusContext(
     private Endpoint<AirlineCodeFilter, AirlineLookupResponse>? airlines;
     public Endpoint<AirlineCodeFilter, AirlineLookupResponse> Airlines =>
         airlines ??= new Endpoint<AirlineCodeFilter, AirlineLookupResponse>(
-            filter => httpClient.Filter<AirlineCodeFilter, AirlineLookupResponse>(
+            operation: filter => httpClient.Filter<AirlineCodeFilter, AirlineLookupResponse>(
                 options,
                 AirlineCodeLookupClient.Path,
                 filter));
@@ -25,15 +25,27 @@ public sealed class AmadeusContext(
     private Endpoint<FlightInspirationFilter, FlightInspirationResponse>? flightInspirations;
     public Endpoint<FlightInspirationFilter, FlightInspirationResponse> FlightInspirations =>
         flightInspirations ??= new Endpoint<FlightInspirationFilter, FlightInspirationResponse>(
-            filter => httpClient.Filter<FlightInspirationFilter, FlightInspirationResponse>(
+            operation: filter => httpClient.Filter<FlightInspirationFilter, FlightInspirationResponse>(
                 options,
                 FlightInspirationClient.Path,
                 filter));
 
-    private Endpoint<Either<AirportCitySearchFilter, LocationId>, Either<AirportCitySearchResponse, Location>>? airportCities;
-    public Endpoint<Either<AirportCitySearchFilter, LocationId>, Either<AirportCitySearchResponse, Location>> AirportCities =>
+    private Endpoint<AirportCitySearchFilter, AirportCitySearchResponse>? airportCities;
+    public Endpoint<AirportCitySearchFilter, AirportCitySearchResponse> AirportCities =>
         airportCities ??=
-            new Endpoint<Either<AirportCitySearchFilter, LocationId>, Either<AirportCitySearchResponse, Location>>(
-                new AirportCitySearchClient(httpClient, options).Filter);
+            new Endpoint<AirportCitySearchFilter, AirportCitySearchResponse>(
+                operation: filter => httpClient.Filter<AirportCitySearchFilter, AirportCitySearchResponse>(
+                    options,
+                    AirportCitySearchClient.Path,
+                    filter));
+
+    private Endpoint<LocationId, Location>? airportCity;
+    public Endpoint<LocationId, Location> AirportCity =>
+        airportCity ??=
+            new Endpoint<LocationId, Location>(
+                operation: locationId => httpClient.Filter<LocationId, Location>(
+                    options,
+                    $"{AirportCitySearchClient.Path}/{locationId}",
+                    locationId));
 }
 
