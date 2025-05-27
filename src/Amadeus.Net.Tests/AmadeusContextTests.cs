@@ -38,20 +38,4 @@ public class AmadeusContextTests
         var uri = new Uri(new Uri(host), tokenPath);
         Assert.Equal("https://test.api.amadeus.com/v1/security/oauth2/token", uri.ToString());
     }
-
-    //[Fact]
-    //public async Task FlightInspiration()
-    //{
-    //    using var services = new ServiceCollection()
-    //        .AddAmadeusContext(configuration)
-    //        .BuildServiceProvider();
-
-    //    var context = services.GetRequiredService<AmadeusContext>();
-    //    var destinations = await context
-    //        .FlightInspirations
-    //        .Filter(() => FlightInspirationFilter.From("PAR"))
-    //        .ExecuteReaderAsync(CancellationToken.None);
-
-    //    Assert.True(destinations.Exists(r => r.Destinations.Any()));
-    //}
 }
