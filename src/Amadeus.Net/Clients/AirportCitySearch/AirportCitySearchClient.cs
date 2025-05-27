@@ -19,10 +19,7 @@ internal sealed class AirportCitySearchClient(
             Right: Filter);
 
     private IO<Either<ErrorResponse, Either<AirportCitySearchResponse, Location>>> Filter(AirportCitySearchFilter filter) =>
-        MapResult(Prelude.use(
-            acquire: () => BuildRequest(HttpMethod.Get, Path, filter.AsQuery()),
-            release: request => request.Dispose())
-            .Bind(httpClient.GetIO<AirportCitySearchResponse>));
+        MapResult(httpClient.Filter<AirportCitySearchFilter, AirportCitySearchResponse>(options, Path, filter));
 
     private static IO<Either<ErrorResponse, Either<AirportCitySearchResponse, Location>>> MapResult(
         IO<Either<ErrorResponse, AirportCitySearchResponse>> responseIO) =>
@@ -31,26 +28,11 @@ internal sealed class AirportCitySearchClient(
                 searchResponse));
 
     private IO<Either<ErrorResponse, Either<AirportCitySearchResponse, Location>>> Filter(LocationId locationId) =>
-        MapResult(Prelude.use(
-            acquire: () => BuildRequest(HttpMethod.Get, $"{Path}/{locationId}", []),
-            release: request => request.Dispose())
-            .Bind(httpClient.GetIO<Location>));
+        MapResult(httpClient.Filter<LocationId, Location>(options, $"{Path}/{locationId}", locationId));
 
     private static IO<Either<ErrorResponse, Either<AirportCitySearchResponse, Location>>> MapResult(
         IO<Either<ErrorResponse, Location>> locationIO) =>
         locationIO.Map(eitherLocation =>
             eitherLocation.Map<Either<AirportCitySearchResponse, Location>>(location =>
                 location));
-
-    private HttpRequestMessage BuildRequest(
-        HttpMethod method,
-        string path,
-        Seq<KeyValuePair<string, string>> query) =>
-        new HttpRequestMessageBuilder(method, new Uri(path, UriKind.Relative))
-            .WithUserAgent(options.ClientName, options.ClientVersion.ToString())
-            .WithUserAgent("dotnet", "9")
-            .Accept("application/vnd.amadeus+json")
-            .Accept("application/json")
-            .WithQueryParameters(query)
-            .Build();
 }
