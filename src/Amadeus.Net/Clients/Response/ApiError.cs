@@ -1,6 +1,6 @@
 using System.Text.Json.Serialization;
 
-namespace Amadeus.Net.Clients.Models;
+namespace Amadeus.Net.Clients.Response;
 
 /// <summary>
 /// Error information

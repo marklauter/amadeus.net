@@ -1,6 +1,6 @@
 using LanguageExt;
 
-namespace Amadeus.Net.Clients.Models;
+namespace Amadeus.Net.Clients.FlightInspiration;
 
 public sealed record TravelDates(
     DateOnly Departure,

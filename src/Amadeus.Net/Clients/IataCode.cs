@@ -1,4 +1,4 @@
-namespace Amadeus.Net.Clients.Models;
+namespace Amadeus.Net.Clients;
 
 public readonly record struct IataCode
 {

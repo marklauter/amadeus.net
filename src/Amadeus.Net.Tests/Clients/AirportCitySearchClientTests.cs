@@ -1,4 +1,5 @@
-﻿using Amadeus.Net.Auth;
+﻿using Amadeus.Net.ApiContext;
+using Amadeus.Net.Auth;
 using Amadeus.Net.Clients.AirportCitySearch;
 using Amadeus.Net.Options;
 using LanguageExt;
@@ -20,7 +21,7 @@ public sealed class AirportCitySearchClientTests
         .AddUserSecrets(Assembly.GetExecutingAssembly(), true, false)
         .Build();
 
-    private ServiceProvider CreateServiceProvider()
+    private ServiceProvider CreateFilterTestServiceProvider()
     {
         var options = configuration
             .GetRequiredSection(AmadeusOptions.SectionName)
@@ -53,26 +54,53 @@ public sealed class AirportCitySearchClientTests
         var tkn = CancellationToken.None;
         var response =
             await Prelude.use(
-                acquire: CreateServiceProvider,
+                acquire: CreateFilterTestServiceProvider,
                 release: provider => provider.Dispose())
             .Map(provider => provider.GetRequiredService<AirportCitySearchClient>())
             .Bind(client => client.Filter(AirportCitySearchFilter
                 .From("MUC")
                 .WithAirports()
                 .WithCities()))
-            .Fork()
-            .Await()
-            .RunAsync(EnvIO.New(token: tkn));
+            .GetAsync(tkn);
 
-        Assert.True(response.IsRight);
         _ = response.Match(
-            Left: error => Assert.Fail("error"),
-            Right: e => _ = e.Match(
-                Left: x =>
-                {
-                    Assert.Equal(2, x.Data.Count);
-                    Assert.NotEmpty(x.Data.Select(l => l.Name.Equals("Munich", StringComparison.OrdinalIgnoreCase)));
-                },
-                Right: y => Assert.Fail("expected city search response")));
+            Left: error => Assert.Fail("expected success"),
+            Right: e =>
+                _ = e.Match(
+                    Left: x =>
+                    {
+                        Assert.Equal(2, x.Data.Count);
+                        Assert.NotEmpty(x.Data.Select(l => l.Name.Equals("Munich", StringComparison.OrdinalIgnoreCase)));
+                    },
+                    Right: y => Assert.Fail("expected city search response")));
+    }
+
+    [Fact]
+    public async Task ContextTest()
+    {
+        var tkn = CancellationToken.None;
+        var response =
+            await Prelude.use(
+                acquire: () => new ServiceCollection()
+                    .AddAmadeusContext(configuration)
+                    .BuildServiceProvider(),
+                release: provider => provider.Dispose())
+            .Map(provider => provider.GetRequiredService<AmadeusContext>())
+            .Bind(context => context.AirportCities.Filter(AirportCitySearchFilter
+                .From("MUC")
+                .WithAirports()
+                .WithCities()))
+            .GetAsync(tkn);
+
+        _ = response.Match(
+            Left: error => Assert.Fail("expected success"),
+            Right: e =>
+                _ = e.Match(
+                    Left: x =>
+                    {
+                        Assert.Equal(2, x.Data.Count);
+                        Assert.NotEmpty(x.Data.Select(l => l.Name.Equals("Munich", StringComparison.OrdinalIgnoreCase)));
+                    },
+                    Right: y => Assert.Fail("expected city search response")));
     }
 }

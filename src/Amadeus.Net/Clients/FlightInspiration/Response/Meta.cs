@@ -1,4 +1,4 @@
-using Amadeus.Net.Clients.Models;
+using Amadeus.Net.Clients.Response;
 using System.Text.Json.Serialization;
 
 namespace Amadeus.Net.Clients.FlightInspiration.Response;

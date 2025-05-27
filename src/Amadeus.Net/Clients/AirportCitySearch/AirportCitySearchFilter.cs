@@ -13,6 +13,7 @@ public sealed record AirportCitySearchFilter(
     Option<int> PageOffset,
     bool Sorted,
     Option<ViewType> View)
+    : IFilter
 {
     public static AirportCitySearchFilter From(string keyword) =>
         new([], keyword, Option<string>.None, Option<int>.None, Option<int>.None, false, Option<ViewType>.None);

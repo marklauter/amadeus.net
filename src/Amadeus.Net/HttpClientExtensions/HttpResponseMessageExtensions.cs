@@ -1,4 +1,4 @@
-using Amadeus.Net.Clients.Models;
+using Amadeus.Net.Clients.Response;
 using LanguageExt;
 using System.Text.Json;
 using System.Text.Json.Serialization;

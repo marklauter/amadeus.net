@@ -1,4 +1,4 @@
-namespace Amadeus.Net.Clients.Models;
+namespace Amadeus.Net.Clients.Response;
 
 /// <summary>
 /// Custom error codes for client-side and domain-specific errors.

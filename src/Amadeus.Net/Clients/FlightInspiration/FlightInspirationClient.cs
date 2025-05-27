@@ -1,9 +1,7 @@
-using Amadeus.Net.ApiContext;
 using Amadeus.Net.Clients.FlightInspiration.Response;
-using Amadeus.Net.Clients.Models;
+using Amadeus.Net.Clients.Response;
 using Amadeus.Net.HttpClientExtensions;
 using Amadeus.Net.Options;
-using Amadeus.Net.HttpClientExtensions;
 using LanguageExt;
 
 namespace Amadeus.Net.Clients.FlightInspiration;
@@ -11,12 +9,12 @@ namespace Amadeus.Net.Clients.FlightInspiration;
 internal sealed class FlightInspirationClient(
     HttpClient httpClient,
     AmadeusOptions options)
-    : IEndpointFactory<FlightInspirationResponse, FlightInspirationFilter>
+//: IEndpointFactory<FlightInspirationResponse, FlightInspirationFilter>
 {
     private const string Path = "/v1/shopping/flight-destinations";
 
-    public Endpoint<FlightInspirationResponse, FlightInspirationFilter> CreateEndpoint() =>
-        new(TryGetFlightInspirationsAsync);
+    //public Endpoint<FlightInspirationResponse, FlightInspirationFilter> CreateEndpoint() =>
+    //    new(TryGetFlightInspirationsAsync);
 
     internal async Task<Either<ErrorResponse, FlightInspirationResponse>> TryGetFlightInspirationsAsync(
         FlightInspirationFilter filter,

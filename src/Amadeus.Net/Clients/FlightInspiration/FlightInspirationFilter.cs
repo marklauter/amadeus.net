@@ -1,4 +1,3 @@
-using Amadeus.Net.Clients.Models;
 using LanguageExt;
 using System.Globalization;
 
@@ -11,6 +10,7 @@ public sealed record FlightInspirationFilter(
     Option<int> TripDurationDays,
     Option<bool> NonStop,
     Option<int> MaxPrice)
+    : IFilter
 {
     public static FlightInspirationFilter From(IataCode origin) => new(
         origin,

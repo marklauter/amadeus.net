@@ -1,7 +1,7 @@
 using System.Diagnostics.CodeAnalysis;
 using System.Text.Json.Serialization;
 
-namespace Amadeus.Net.Clients.Models;
+namespace Amadeus.Net.Clients.Response;
 
 /// <summary>
 /// Source of an error or warning

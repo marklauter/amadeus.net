@@ -63,18 +63,18 @@ public sealed class HttpRequestMessageBuilder(
         return this;
     }
 
-    public HttpRequestMessageBuilder WithQueryParameters(params KeyValuePair<string, string>[] parameters)
+    public HttpRequestMessageBuilder WithQueryParameters(params KeyValuePair<string, string>[] query)
     {
-        if (parameters.Length > 0)
-            queryParameters.AddRange(parameters);
+        if (query.Length > 0)
+            queryParameters.AddRange(query);
 
         return this;
     }
 
-    public HttpRequestMessageBuilder WithQueryParameters(Seq<KeyValuePair<string, string>> parameters)
+    public HttpRequestMessageBuilder WithQueryParameters(Seq<KeyValuePair<string, string>> query)
     {
-        if (parameters.Any())
-            queryParameters.AddRange(parameters);
+        if (query.Any())
+            queryParameters.AddRange(query);
 
         return this;
     }

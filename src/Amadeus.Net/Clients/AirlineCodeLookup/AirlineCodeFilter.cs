@@ -6,10 +6,14 @@ namespace Amadeus.Net.Clients.AirlineCodeLookup;
 
 public sealed record AirlineCodeFilter(Seq<string> Codes)
     : Monoid<AirlineCodeFilter>
+    , IFilter
 {
     [SuppressMessage("Style", "IDE0301:Simplify collection initialization")]
     public static AirlineCodeFilter Empty { get; } =
         new(Seq<string>.Empty);
+
+    public static AirlineCodeFilter From(string code) =>
+        From(Prelude.Seq(code));
 
     public static AirlineCodeFilter From(Seq<string> codes) =>
         new(codes);
@@ -19,4 +23,9 @@ public sealed record AirlineCodeFilter(Seq<string> Codes)
 
     public AirlineCodeFilter Combine(AirlineCodeFilter rhs) =>
         new(Codes.Combine(rhs.Codes));
+
+    public Seq<KeyValuePair<string, string>> AsQuery() =>
+        Codes.Match(
+            Empty: () => [],
+            Seq: codes => Prelude.Seq(KeyValuePair.Create("airlineCodes", string.Join(',', codes.Distinct()))));
 }
