@@ -13,64 +13,37 @@ internal static class HttpResponseMessageExtensions
         Converters = { new JsonStringEnumConverter(JsonNamingPolicy.CamelCase) }
     };
 
-    public static async Task<Either<ErrorResponse, TParseResult>> TryParseAsync<TParseResult>(
-        this HttpResponseMessage response,
-        CancellationToken cancellationToken)
-    {
-        var content = await response.Content.ReadAsStringAsync(cancellationToken);
-
-        return response.IsSuccessStatusCode
-            ? JsonSerializer.Deserialize<TParseResult>(content, JsonOptions) is { } parseResult
-                ? parseResult
-                : ErrorResponse.Create(
-                    new ApiError(
-                        -1,
-                        (long)CustomErrorCode.DeserializationError,
-                        "DATA DESERIALIZATION ERROR",
-                        $"Could not deserialize {typeof(TParseResult).FullName} from response: {content}",
-                        null
-                    )
-                )
-            : JsonSerializer.Deserialize<ErrorResponse>(content, JsonOptions)
-                ?? ErrorResponse.Create(
-                    new ApiError(
-                        -1,
-                        (long)CustomErrorCode.ErrorResponseDeserializationError,
-                        "ERROR RESPONSE DESERIALIZATION ERROR",
-                        $"Could not deserialize ErrorResponse from response: {content}",
-                        null
-                    )
-                );
-    }
-
     public static IO<Either<ErrorResponse, TParseResult>> Parse<TParseResult>(
         this HttpResponseMessage response) =>
-        response.Content
-        .ReadAsString()
-        .Map(contentString =>
-            response.IsSuccessStatusCode
-                ? JsonSerializer.Deserialize<TParseResult>(contentString, JsonOptions) is { } parseResult
-                    ? Right<ErrorResponse, TParseResult>(parseResult)
-                    : Left<ErrorResponse, TParseResult>(ErrorResponse.Create(
-                        new ApiError(
-                            -1,
-                            (long)CustomErrorCode.DeserializationError,
-                            "DATA DESERIALIZATION ERROR",
-                            $"Could not deserialize {typeof(TParseResult).FullName} from response: {contentString}",
-                            null
-                        )
-                    ))
-                : JsonSerializer.Deserialize<ErrorResponse>(contentString, JsonOptions) is { } errorResponse
-                    ? Left<ErrorResponse, TParseResult>(errorResponse)
-                    : Left<ErrorResponse, TParseResult>(ErrorResponse.Create(
-                        new ApiError(
-                            -1,
-                            (long)CustomErrorCode.ErrorResponseDeserializationError,
-                            "ERROR RESPONSE DESERIALIZATION ERROR",
-                            $"Could not deserialize ErrorResponse from response: {contentString}",
-                            null
-                        ))));
+        response.Content.AsString().Map(content => response.IsSuccessStatusCode
+            ? TryParse<TParseResult>(content)
+            : TryParse<ErrorResponse>(content).Bind(e => Left<ErrorResponse, TParseResult>(e)));
 
-    private static IO<string> ReadAsString(this HttpContent content) =>
+    private static Either<ErrorResponse, TParseResult> TryParse<TParseResult>(string content) =>
+        Try.lift(() => Parse<TParseResult>(content))
+            .Match(
+                Succ: r => r,
+                Fail: error => Left<ErrorResponse, TParseResult>(ErrorResponse.Create(
+                new ApiError(
+                    -1,
+                    (long)CustomErrorCode.DeserializationError,
+                    $"DESERIALIZATION ERROR: Message: {error.Message}",
+                    $"Could not deserialize {typeof(TParseResult).FullName} from content: {content}",
+                    null))));
+
+    private static Either<ErrorResponse, TParseResult> Parse<TParseResult>(string content) =>
+        JsonSerializer.Deserialize<TParseResult>(content, JsonOptions) is { } parseResult
+            ? Right<ErrorResponse, TParseResult>(parseResult)
+            : Left<ErrorResponse, TParseResult>(ErrorResponse.Create(
+                new ApiError(
+                    -1,
+                    (long)CustomErrorCode.DeserializationError,
+                    "DESERIALIZATION ERROR",
+                    $"Could not deserialize {typeof(TParseResult).FullName} from content: {content}",
+                    null
+                )
+            ));
+
+    private static IO<string> AsString(this HttpContent content) =>
         liftIO(env => content.ReadAsStringAsync(env.Token));
 }
