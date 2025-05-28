@@ -7,23 +7,19 @@ namespace Amadeus.Net.HttpClientExtensions;
 
 public static class HttpClientExtensions
 {
-    public static IO<HttpResponseMessage> SendIO(this HttpClient httpClient, HttpRequestMessage request) =>
-        Prelude.liftIO(e => httpClient.SendAsync(request, e.Token));
+    public static IO<Either<ErrorResponse, R>> Get<Q, R>(this HttpClient httpClient, AmadeusOptions options, string path, Q query)
+        where Q : IQuery =>
+        Prelude.use(
+            acquire: () => options.BuildGetRequest(path, query.ToParams()),
+            release: request => request.Dispose())
+            .Bind(httpClient.GetIO<R>);
 
-    public static IO<Either<ErrorResponse, T>> GetIO<T>(this HttpClient httpClient, HttpRequestMessage request) =>
+    private static IO<Either<ErrorResponse, T>> GetIO<T>(this HttpClient httpClient, HttpRequestMessage request) =>
         Prelude.use(
             acquire: httpClient.SendIO(request),
             release: response => response.Dispose())
             .Bind(response => response.Parse<T>());
 
-    public static IO<Either<ErrorResponse, R>> Filter<F, R>(
-        this HttpClient httpClient,
-        AmadeusOptions options,
-        string path,
-        F filter) where F : IQuery =>
-        Prelude.use(
-            acquire: () => options.BuildGetRequest(path, filter.ToParams()),
-            release: request => request.Dispose())
-            .Bind(httpClient.GetIO<R>);
-
+    private static IO<HttpResponseMessage> SendIO(this HttpClient httpClient, HttpRequestMessage request) =>
+        Prelude.liftIO(env => httpClient.SendAsync(request, env.Token));
 }
