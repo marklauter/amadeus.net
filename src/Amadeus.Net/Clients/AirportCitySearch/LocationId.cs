@@ -1,9 +1,9 @@
 using LanguageExt;
 
-namespace Amadeus.Net.Clients.AirportCitySearch.Response;
+namespace Amadeus.Net.Clients.AirportCitySearch;
 
 public sealed class LocationId
-    : IFilter
+    : IQuery
 {
     private readonly string value;
 
@@ -13,7 +13,7 @@ public sealed class LocationId
         this.value = value.ToUpperInvariant();
     }
 
-    public Seq<KeyValuePair<string, string>> AsQuery() => [];
+    public Seq<KeyValuePair<string, string>> ToParams() => [];
 
     public override string ToString() => value;
     public static implicit operator string(LocationId code) => code.value;
