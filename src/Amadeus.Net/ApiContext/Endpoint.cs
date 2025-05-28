@@ -1,26 +1,20 @@
+using Amadeus.Net.Clients;
 using Amadeus.Net.Clients.Response;
 using LanguageExt;
 
 namespace Amadeus.Net.ApiContext;
 
 /// <summary>
-/// Defines the signature for an operation that can be executed by an <see cref="Endpoint{R, F}"/>.
+/// Represents an operation that receives a query of type Q and returns an IO containing either an ErrorResponse or a response of type R.
+/// The IO monad provided by <see cref="LanguageExt.IO{T}"/> encapsulates the deferred execution of the operation.
 /// </summary>
-/// <typeparam name="F">The type of the filter or parameters for the operation.</typeparam>
-/// <typeparam name="R">The type of the successful domain result from the operation.</typeparam>
-/// <param name="filter">The filter or parameters for the operation.</param>
-/// <returns>An <see cref="IO{A}"/> that, when run, will execute the operation and produce an <see cref="Either{L, R}"/> of <see cref="ErrorResponse"/> or <typeparamref name="R"/>.</returns>
-public delegate IO<Either<ErrorResponse, R>> EndpointOperation<in F, R>(F filter);
+/// <typeparam name="Q">The type of query. Must implement IQuery.</typeparam>
+/// <typeparam name="R">The type of response.</typeparam>
+public delegate IO<Either<ErrorResponse, R>> GetOperation<in Q, R>(Q query) where Q : IQuery;
 
 /// <summary>
-/// Represents a configurable API endpoint operation.
+/// Represents an endpoint that encapsulates a GET operation for specific query and response types.
 /// </summary>
-/// <typeparam name="F">The type of the filter or parameters for the operation.</typeparam>
-/// <typeparam name="R">The type of the successful domain result from the operation.</typeparam>
-public sealed class Endpoint<F, R>(EndpointOperation<F, R> operation)
-{
-    private readonly EndpointOperation<F, R> operation = operation
-        ?? throw new ArgumentNullException(nameof(operation));
-
-    public IO<Either<ErrorResponse, R>> Filter(F filter) => operation(filter);
-}
+/// <typeparam name="Q">The type of query. Must implement IQuery.</typeparam>
+/// <typeparam name="R">The type of response.</typeparam>
+public readonly record struct Endpoint<Q, R>(GetOperation<Q, R> Get) where Q : IQuery;
