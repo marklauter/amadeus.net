@@ -1,6 +1,5 @@
 using LanguageExt;
 using LanguageExt.Traits;
-using System.Diagnostics.CodeAnalysis;
 
 namespace Amadeus.Net.Clients.AirlineCodeLookup;
 
@@ -8,9 +7,8 @@ public sealed record AirlineCodeQuery(Seq<string> Codes)
     : Monoid<AirlineCodeQuery>
     , IQuery
 {
-    [SuppressMessage("Style", "IDE0301:Simplify collection initialization")]
     public static AirlineCodeQuery Empty { get; } =
-        new(Seq<string>.Empty);
+        new([]);
 
     public static AirlineCodeQuery From(string code) =>
         From(Prelude.Seq(code));
