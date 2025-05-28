@@ -14,41 +14,40 @@ public sealed class AmadeusContext(
     HttpClient httpClient,
     AmadeusOptions options)
 {
-    private readonly Lazy<Endpoint<AirlineCodeFilter, AirlineLookupResponse>> airlines =
+    private readonly Lazy<Endpoint<AirlineCodeQuery, AirlineLookupResponse>> airlines =
         new(() =>
-            new Endpoint<AirlineCodeFilter, AirlineLookupResponse>(
-                operation: filter => httpClient.Filter<AirlineCodeFilter, AirlineLookupResponse>(
+            new Endpoint<AirlineCodeQuery, AirlineLookupResponse>(
+                Get: filter => httpClient.Filter<AirlineCodeQuery, AirlineLookupResponse>(
                     options,
                     AirlineCodeLookupClient.Path,
                     filter)));
-    public Endpoint<AirlineCodeFilter, AirlineLookupResponse> Airlines => airlines.Value;
+    public Endpoint<AirlineCodeQuery, AirlineLookupResponse> Airlines => airlines.Value;
 
-    private readonly Lazy<Endpoint<FlightInspirationFilter, FlightInspirationResponse>> flightInspirations =
+    private readonly Lazy<Endpoint<FlightInspirationQuery, FlightInspirationResponse>> flightInspirations =
         new(() =>
-            new Endpoint<FlightInspirationFilter, FlightInspirationResponse>(
-                operation: filter => httpClient.Filter<FlightInspirationFilter, FlightInspirationResponse>(
+            new Endpoint<FlightInspirationQuery, FlightInspirationResponse>(
+                Get: filter => httpClient.Filter<FlightInspirationQuery, FlightInspirationResponse>(
                     options,
                     FlightInspirationClient.Path,
                     filter)));
-    public Endpoint<FlightInspirationFilter, FlightInspirationResponse> FlightInspirations => flightInspirations.Value;
+    public Endpoint<FlightInspirationQuery, FlightInspirationResponse> FlightInspirations => flightInspirations.Value;
 
-    // todo: make lazy
-    private Endpoint<AirportCitySearchFilter, AirportCitySearchResponse>? airportCities;
-    public Endpoint<AirportCitySearchFilter, AirportCitySearchResponse> AirportCities =>
-        airportCities ??=
-            new Endpoint<AirportCitySearchFilter, AirportCitySearchResponse>(
-                operation: filter => httpClient.Filter<AirportCitySearchFilter, AirportCitySearchResponse>(
-                    options,
-                    AirportCitySearchClient.Path,
-                    filter));
+    private readonly Lazy<Endpoint<AirportCityQuery, AirportCitySearchResponse>> airportCities =
+        new(() =>
+            new Endpoint<AirportCityQuery, AirportCitySearchResponse>(
+                    Get: filter => httpClient.Filter<AirportCityQuery, AirportCitySearchResponse>(
+                        options,
+                        AirportCitySearchClient.Path,
+                        filter)));
+    public Endpoint<AirportCityQuery, AirportCitySearchResponse> AirportCities => airportCities.Value;
 
-    private Endpoint<LocationId, Location>? airportCity;
-    public Endpoint<LocationId, Location> AirportCity =>
-        airportCity ??=
+    private readonly Lazy<Endpoint<LocationId, Location>> airportCity =
+        new(() =>
             new Endpoint<LocationId, Location>(
-                operation: locationId => httpClient.Filter<LocationId, Location>(
-                    options,
-                    $"{AirportCitySearchClient.Path}/{locationId}",
-                    locationId));
+                    Get: locationId => httpClient.Filter<LocationId, Location>(
+                        options,
+                        $"{AirportCitySearchClient.Path}/{locationId}",
+                        locationId)));
+    public Endpoint<LocationId, Location> AirportCity => airportCity.Value;
 }
 
