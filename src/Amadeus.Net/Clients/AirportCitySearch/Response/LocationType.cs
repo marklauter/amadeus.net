@@ -15,3 +15,16 @@ public enum LocationType
     [EnumMember(Value = "DISTRICT")]
     District
 }
+
+public static class LocationTypeExtensions
+{
+    public static string ToEnumMemberString(this LocationType locationType) =>
+        locationType switch
+        {
+            LocationType.Airport => "AIRPORT",
+            LocationType.City => "CITY",
+            LocationType.PointOfInterest => "POINT_OF_INTEREST",
+            LocationType.District => "DISTRICT",
+            _ => locationType.ToString()
+        };
+}
