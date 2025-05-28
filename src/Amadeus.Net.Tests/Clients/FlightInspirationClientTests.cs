@@ -30,7 +30,7 @@ public sealed class FlightInspirationClientTests
                     .BuildServiceProvider(),
                 release: provider => provider.Dispose())
             .Map(provider => provider.GetRequiredService<AmadeusContext>())
-            .Bind(context => context.FlightInspirations.Filter(FlightInspirationFilter.From("PAR")))
+            .Bind(context => context.FlightInspirations.Get(FlightInspirationQuery.From("PAR")))
             .InvokeAsync(tkn);
 
         _ = response.Match(

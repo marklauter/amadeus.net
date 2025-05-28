@@ -3,16 +3,16 @@ using System.Globalization;
 
 namespace Amadeus.Net.Clients.FlightInspiration;
 
-public sealed record FlightInspirationFilter(
+public sealed record FlightInspirationQuery(
     IataCode Origin,
     Option<TravelDates> TravelDates,
     Option<bool> OneWay,
     Option<int> TripDurationDays,
     Option<bool> NonStop,
     Option<int> MaxPrice)
-    : IFilter
+    : IQuery
 {
-    public static FlightInspirationFilter From(IataCode origin) => new(
+    public static FlightInspirationQuery From(IataCode origin) => new(
         origin,
         Option<TravelDates>.None,
         Option<bool>.None,
@@ -20,13 +20,13 @@ public sealed record FlightInspirationFilter(
         Option<bool>.None,
         Option<int>.None);
 
-    public FlightInspirationFilter WithTravelDates(TravelDates travelDates) => this with { TravelDates = travelDates };
-    public FlightInspirationFilter WithOneWay(bool oneWay) => this with { OneWay = oneWay };
-    public FlightInspirationFilter WithTripDuration(int days) => this with { TripDurationDays = days };
-    public FlightInspirationFilter WithNonStop(bool nonStop) => this with { NonStop = nonStop };
-    public FlightInspirationFilter WithMaxPrice(int maxPrice) => this with { MaxPrice = maxPrice };
+    public FlightInspirationQuery WithTravelDates(TravelDates travelDates) => this with { TravelDates = travelDates };
+    public FlightInspirationQuery WithOneWay(bool oneWay) => this with { OneWay = oneWay };
+    public FlightInspirationQuery WithTripDuration(int days) => this with { TripDurationDays = days };
+    public FlightInspirationQuery WithNonStop(bool nonStop) => this with { NonStop = nonStop };
+    public FlightInspirationQuery WithMaxPrice(int maxPrice) => this with { MaxPrice = maxPrice };
 
-    public Seq<KeyValuePair<string, string>> AsQuery() =>
+    public Seq<KeyValuePair<string, string>> ToParams() =>
         Prelude.Seq(
             Prelude.Some(KeyValuePair.Create("origin", Origin.ToString())),
             TravelDates.Map(dates => KeyValuePair.Create("departureDate", dates.ToString())),

@@ -30,10 +30,12 @@ public sealed class AirportCitySearchClientTests
                     .BuildServiceProvider(),
                 release: provider => provider.Dispose())
             .Map(provider => provider.GetRequiredService<AmadeusContext>())
-            .Bind(context => context.AirportCities.Filter(AirportCitySearchFilter
-                .From("MUC")
-                .WithAirports()
-                .WithCities()))
+            .Bind(context => context.AirportCities.Get(AirportCityQuery
+                .StartsWith("MUC")
+                .IncludeAirports()
+                .IncludeCities()
+                .IncludeDistricts()
+                .IncludePointsOfInterest()))
             .InvokeAsync(tkn);
 
         _ = response.Match(
