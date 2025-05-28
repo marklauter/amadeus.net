@@ -20,9 +20,9 @@ public static class HttpClientExtensions
         this HttpClient httpClient,
         AmadeusOptions options,
         string path,
-        F filter) where F : IFilter =>
+        F filter) where F : IQuery =>
         Prelude.use(
-            acquire: () => options.BuildGetRequest(path, filter.AsQuery()),
+            acquire: () => options.BuildGetRequest(path, filter.ToParams()),
             release: request => request.Dispose())
             .Bind(httpClient.GetIO<R>);
 
