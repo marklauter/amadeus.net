@@ -1,5 +1,6 @@
-﻿using Amadeus.Net.ApiContext;
-using Amadeus.Net.Clients.FlightInspiration;
+﻿using Amadeus.Net.Context;
+using Amadeus.Net.Endpoints.FlightInspiration;
+using Amadeus.Net.HttpClientExtensions;
 using LanguageExt;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -10,12 +11,12 @@ namespace Amadeus.Net.Tests.Clients;
 public sealed class FlightInspirationClientTests
 {
     private readonly IConfiguration configuration = new ConfigurationBuilder()
-        .AddInMemoryCollection(new Dictionary<string, string>
+        .AddInMemoryCollection(new Dictionary<string, string?>
         {
             { "Amadeus:Host", "https://test.api.amadeus.com" },
             { "Amadeus:ClientMetaData:ClientVersion", "0.0.0" },
             { "Amadeus:ClientMetaData:ClientName", "TWAI" },
-        }!)
+        })
         .AddUserSecrets(Assembly.GetExecutingAssembly(), true, false)
         .Build();
 
@@ -30,7 +31,7 @@ public sealed class FlightInspirationClientTests
                     .BuildServiceProvider(),
                 release: provider => provider.Dispose())
             .Map(provider => provider.GetRequiredService<AmadeusContext>())
-            .Bind(context => context.FlightInspirations.GetFn(FlightInspirationQuery.From("PAR")))
+            .Bind(context => context.FlightInspirations.Get(FlightInspirationQuery.From("PAR")))
             .InvokeAsync(tkn);
 
         _ = response.Match(

@@ -1,4 +1,4 @@
-﻿using Amadeus.Net.Clients;
+﻿using Amadeus.Net.Endpoints.Query;
 using Amadeus.Net.Options;
 using LanguageExt;
 

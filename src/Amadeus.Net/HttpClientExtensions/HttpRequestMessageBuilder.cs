@@ -1,4 +1,4 @@
-﻿using Amadeus.Net.Clients;
+﻿using Amadeus.Net.Endpoints.Query;
 using LanguageExt;
 using System.Diagnostics.CodeAnalysis;
 using System.Net.Http.Headers;

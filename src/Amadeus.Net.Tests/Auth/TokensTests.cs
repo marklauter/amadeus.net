@@ -8,12 +8,12 @@ namespace Amadeus.Net.Tests.Auth;
 public sealed partial class TokensTests
 {
     private readonly IConfiguration configuration = new ConfigurationBuilder()
-        .AddInMemoryCollection(new Dictionary<string, string>
+        .AddInMemoryCollection(new Dictionary<string, string?>
         {
             { "Amadeus:Host", "https://test.api.amadeus.com" },
             { "Amadeus:ClientMetaData:ClientVersion", "0.0.0" },
             { "Amadeus:ClientMetaData:ClientName", "tests" },
-        }!)
+        })
         .AddUserSecrets(Assembly.GetExecutingAssembly(), true, false)
         .Build();
 

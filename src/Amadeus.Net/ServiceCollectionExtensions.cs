@@ -1,4 +1,4 @@
-﻿using Amadeus.Net.ApiContext;
+﻿using Amadeus.Net.Context;
 using Amadeus.Net.Auth;
 using Amadeus.Net.Options;
 using Microsoft.Extensions.Configuration;

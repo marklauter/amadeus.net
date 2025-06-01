@@ -1,4 +1,4 @@
-﻿using Amadeus.Net.ApiContext;
+﻿using Amadeus.Net.Context;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using System.Reflection;
@@ -8,12 +8,12 @@ namespace Amadeus.Net.Tests;
 public class AmadeusContextTests
 {
     private readonly IConfiguration configuration = new ConfigurationBuilder()
-        .AddInMemoryCollection(new Dictionary<string, string>
+        .AddInMemoryCollection(new Dictionary<string, string?>
         {
             { "Amadeus:Host", "https://test.api.amadeus.com" },
             { "Amadeus:ClientMetaData:ClientVersion", "0.0.0" },
             { "Amadeus:ClientMetaData:ClientName", "TWAI" },
-        }!)
+        })
         .AddUserSecrets(Assembly.GetExecutingAssembly(), true, false)
         .Build();
 

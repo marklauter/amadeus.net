@@ -1,5 +1,5 @@
-﻿using Amadeus.Net.Clients;
-using Amadeus.Net.Clients.Response;
+﻿using Amadeus.Net.Endpoints.Response;
+using Amadeus.Net.Endpoints.Query;
 using Amadeus.Net.Options;
 using LanguageExt;
 
