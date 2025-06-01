@@ -10,4 +10,7 @@ namespace Amadeus.Net.Clients.Response;
 public sealed record Source(
     [property: JsonPropertyName("pointer")] string? Pointer,
     [property: JsonPropertyName("parameter")] string? Parameter,
-    [property: JsonPropertyName("example")] string? Example);
+    [property: JsonPropertyName("example")] string? Example)
+{
+    public override string ToString() => $"{Pointer} {Parameter} {Example}";
+}
