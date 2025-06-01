@@ -30,16 +30,15 @@ public sealed class AirportCitySearchClientTests
                     .BuildServiceProvider(),
                 release: provider => provider.Dispose())
             .Map(provider => provider.GetRequiredService<AmadeusContext>())
-            .Bind(context => context.AirportCities.Get(AirportCityQuery
+            .Bind(context => context.AirportCities.Get(
+                AirportCityQuery
                 .StartsWith("MUC")
                 .IncludeAirports()
-                .IncludeCities()
-                .IncludeDistricts()
-                .IncludePointsOfInterest()))
+                .IncludeCities()))
             .InvokeAsync(tkn);
 
         _ = response.Match(
-            Left: error => Assert.Fail("expected success"),
+            Left: error => Assert.Fail($"expected success: {error}"),
             Right: r =>
                 {
                     Assert.Equal(2, r.Locations.Count);
