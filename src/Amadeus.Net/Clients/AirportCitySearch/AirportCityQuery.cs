@@ -31,15 +31,15 @@ public sealed record AirportCityQuery(
     public AirportCityQuery Sort() => this with { Sorted = true };
     public AirportCityQuery WithView(ViewType view) => this with { View = view };
 
-    public Seq<KeyValuePair<string, string>> ToParams() =>
+    public Seq<QueryParameter> ToParams() =>
         Prelude.Seq(
-            Prelude.Some(KeyValuePair.Create("subType", string.Join(",", MetaLocations.Distinct().Select(lt => lt.ToEnumMemberString())))),
-            Prelude.Some(KeyValuePair.Create("keyword", Keyword)),
-            CountryCode.Map(code => KeyValuePair.Create("countryCode", code)),
-            PageLimit.Map(limit => KeyValuePair.Create("page[limit]", limit.ToString(CultureInfo.InvariantCulture))),
-            PageOffset.Map(offset => KeyValuePair.Create("page[offset]", offset.ToString(CultureInfo.InvariantCulture))),
-            Sorted ? Prelude.Some(KeyValuePair.Create("sort", "analytics.travelers.score")) : Prelude.None,
-            View.Map(viewType => KeyValuePair.Create("view", viewType.ToString().ToUpperInvariant())))
+            Prelude.Some(QueryParameter.Create("subType", string.Join(",", MetaLocations.Distinct().Select(lt => lt.ToEnumMemberString())))),
+            Prelude.Some(QueryParameter.Create("keyword", Keyword)),
+            CountryCode.Map(code => QueryParameter.Create("countryCode", code)),
+            PageLimit.Map(limit => QueryParameter.Create("page[limit]", limit.ToString(CultureInfo.InvariantCulture))),
+            PageOffset.Map(offset => QueryParameter.Create("page[offset]", offset.ToString(CultureInfo.InvariantCulture))),
+            Sorted ? Prelude.Some(QueryParameter.Create("sort", "analytics.travelers.score")) : Prelude.None,
+            View.Map(viewType => QueryParameter.Create("view", viewType.ToString().ToUpperInvariant())))
         .Choose(option => option);
 }
 

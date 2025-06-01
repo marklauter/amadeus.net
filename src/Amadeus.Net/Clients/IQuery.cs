@@ -4,5 +4,5 @@ namespace Amadeus.Net.Clients;
 
 public interface IQuery
 {
-    Seq<KeyValuePair<string, string>> ToParams();
+    Seq<QueryParameter> ToParams();
 }

@@ -26,13 +26,13 @@ public sealed record FlightInspirationQuery(
     public FlightInspirationQuery WithNonStop(bool nonStop) => this with { NonStop = nonStop };
     public FlightInspirationQuery WithMaxPrice(int maxPrice) => this with { MaxPrice = maxPrice };
 
-    public Seq<KeyValuePair<string, string>> ToParams() =>
+    public Seq<QueryParameter> ToParams() =>
         Prelude.Seq(
-            Prelude.Some(KeyValuePair.Create("origin", Origin.ToString())),
-            TravelDates.Map(dates => KeyValuePair.Create("departureDate", dates.ToString())),
-            OneWay.Map(oneWay => KeyValuePair.Create("oneWay", oneWay.ToString().ToLowerInvariant())),
-            TripDurationDays.Map(duration => KeyValuePair.Create("duration", duration.ToString(CultureInfo.InvariantCulture))),
-            NonStop.Map(nonStop => KeyValuePair.Create("nonStop", nonStop.ToString().ToLowerInvariant())),
-            MaxPrice.Map(price => KeyValuePair.Create("maxPrice", price.ToString(CultureInfo.InvariantCulture))))
+            Prelude.Some(QueryParameter.Create("origin", Origin.ToString())),
+            TravelDates.Map(dates => QueryParameter.Create("departureDate", dates.ToString())),
+            OneWay.Map(oneWay => QueryParameter.Create("oneWay", oneWay.ToString().ToLowerInvariant())),
+            TripDurationDays.Map(duration => QueryParameter.Create("duration", duration.ToString(CultureInfo.InvariantCulture))),
+            NonStop.Map(nonStop => QueryParameter.Create("nonStop", nonStop.ToString().ToLowerInvariant())),
+            MaxPrice.Map(price => QueryParameter.Create("maxPrice", price.ToString(CultureInfo.InvariantCulture))))
         .Choose(option => option);
 }

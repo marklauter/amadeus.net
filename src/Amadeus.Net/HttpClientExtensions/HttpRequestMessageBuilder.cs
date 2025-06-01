@@ -1,4 +1,5 @@
-﻿using LanguageExt;
+﻿using Amadeus.Net.Clients;
+using LanguageExt;
 using System.Diagnostics.CodeAnalysis;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
@@ -30,7 +31,7 @@ public sealed class HttpRequestMessageBuilder(
         Some: uri => new HttpRequestMessage(method ?? throw new ArgumentNullException(nameof(method)), uri),
         None: new HttpRequestMessage(method ?? throw new ArgumentNullException(nameof(method)), (string?)null));
 
-    private readonly List<KeyValuePair<string, string>> queryParameters = [];
+    private readonly List<QueryParameter> queryParameters = [];
 
     public HttpRequestMessageBuilder()
         : this(HttpMethod.Get, Option<Uri>.None)
@@ -55,15 +56,15 @@ public sealed class HttpRequestMessageBuilder(
     }
 
     public HttpRequestMessageBuilder WithQueryParameter(string key, string value) =>
-        WithQueryParameter(KeyValuePair.Create(key, value));
+        WithQueryParameter(QueryParameter.Create(key, value));
 
-    public HttpRequestMessageBuilder WithQueryParameter(KeyValuePair<string, string> parameter)
+    public HttpRequestMessageBuilder WithQueryParameter(QueryParameter parameter)
     {
         queryParameters.Add(parameter);
         return this;
     }
 
-    public HttpRequestMessageBuilder WithQueryParameters(params KeyValuePair<string, string>[] query)
+    public HttpRequestMessageBuilder WithQueryParameters(params QueryParameter[] query)
     {
         if (query.Length > 0)
             queryParameters.AddRange(query);
@@ -71,7 +72,7 @@ public sealed class HttpRequestMessageBuilder(
         return this;
     }
 
-    public HttpRequestMessageBuilder WithQueryParameters(Seq<KeyValuePair<string, string>> query)
+    public HttpRequestMessageBuilder WithQueryParameters(Seq<QueryParameter> query)
     {
         if (query.Any())
             queryParameters.AddRange(query);
@@ -332,10 +333,10 @@ public sealed class HttpRequestMessageBuilder(
         {
             request.RequestUri = request.RequestUri is not null
                 ? new Uri(
-                    $"{request.RequestUri}?{string.Join('&', queryParameters.Select(item => $"{Uri.EscapeDataString(item.Key)}={Uri.EscapeDataString(item.Value)}"))}",
+                    $"{request.RequestUri}?{string.Join('&', queryParameters.Select(item => $"{item.Key}={item.Value}"))}",
                     UriKind.Relative)
                 : new Uri(
-                    $"?{string.Join('&', queryParameters.Select(item => $"{Uri.EscapeDataString(item.Key)}={Uri.EscapeDataString(item.Value)}"))}",
+                    $"?{string.Join('&', queryParameters.Select(item => $"{item.Key}={item.Value}"))}",
                     UriKind.Relative);
         }
 

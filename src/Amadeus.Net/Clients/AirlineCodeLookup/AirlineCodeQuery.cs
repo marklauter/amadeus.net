@@ -22,8 +22,8 @@ public sealed record AirlineCodeQuery(Seq<string> Codes)
     public AirlineCodeQuery Combine(AirlineCodeQuery rhs) =>
         new(Codes.Combine(rhs.Codes));
 
-    public Seq<KeyValuePair<string, string>> ToParams() =>
+    public Seq<QueryParameter> ToParams() =>
         Codes.Match(
             Empty: () => [],
-            Seq: codes => Prelude.Seq(KeyValuePair.Create("airlineCodes", string.Join(',', codes.Distinct()))));
+            Seq: codes => Prelude.Seq(QueryParameter.Create("airlineCodes", string.Join(',', codes.Distinct()))));
 }

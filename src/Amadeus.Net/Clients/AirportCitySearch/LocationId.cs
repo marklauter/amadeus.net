@@ -13,7 +13,7 @@ public sealed class LocationId
         this.value = value.ToUpperInvariant();
     }
 
-    public Seq<KeyValuePair<string, string>> ToParams() => [];
+    public Seq<QueryParameter> ToParams() => [];
 
     public override string ToString() => value;
     public static implicit operator string(LocationId code) => code.value;
