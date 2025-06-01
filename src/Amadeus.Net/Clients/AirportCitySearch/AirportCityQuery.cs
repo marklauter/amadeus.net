@@ -33,7 +33,7 @@ public sealed record AirportCityQuery(
 
     public Seq<KeyValuePair<string, string>> ToParams() =>
         Prelude.Seq(
-            Prelude.Some(KeyValuePair.Create("subType", string.Join(",", MetaLocations.Distinct().Select(s => s.ToEnumMemberString())))),
+            Prelude.Some(KeyValuePair.Create("subType", string.Join(",", MetaLocations.Distinct().Select(lt => lt.ToEnumMemberString())))),
             Prelude.Some(KeyValuePair.Create("keyword", Keyword)),
             CountryCode.Map(code => KeyValuePair.Create("countryCode", code)),
             PageLimit.Map(limit => KeyValuePair.Create("page[limit]", limit.ToString(CultureInfo.InvariantCulture))),
