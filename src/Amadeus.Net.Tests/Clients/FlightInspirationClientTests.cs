@@ -34,7 +34,7 @@ public sealed class FlightInspirationClientTests
             .InvokeAsync(tkn);
 
         _ = response.Match(
-            Left: error => Assert.Fail("expected success"),
+            Left: error => Assert.Fail($"expected success: {error}"),
             Right: r => Assert.True(r.Destinations.Any()));
     }
 }
