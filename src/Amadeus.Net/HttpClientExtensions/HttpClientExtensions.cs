@@ -7,10 +7,10 @@ namespace Amadeus.Net.HttpClientExtensions;
 
 public static class HttpClientExtensions
 {
-    public static IO<Either<ErrorResponse, R>> Get<Q, R>(this HttpClient httpClient, AmadeusOptions options, string path, Q query)
+    public static IO<Either<ErrorResponse, R>> Get<Q, R>(this HttpClient httpClient, ClientMetaData clientMetaData, string path, Q query)
         where Q : IQuery =>
         Prelude.use(
-            acquire: () => options.BuildGetRequest(path, query.ToParams()),
+            acquire: () => clientMetaData.BuildGetRequest(path, query.ToParams()),
             release: request => request.Dispose())
             .Bind(httpClient.GetIO<R>);
 

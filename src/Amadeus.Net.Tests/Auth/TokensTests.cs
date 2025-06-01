@@ -11,8 +11,8 @@ public sealed partial class TokensTests
         .AddInMemoryCollection(new Dictionary<string, string>
         {
             { "Amadeus:Host", "https://test.api.amadeus.com" },
-            { "Amadeus:ClientVersion", "0.0.0" },
-            { "Amadeus:ClientName", "tests" },
+            { "Amadeus:ClientMetaData:ClientVersion", "0.0.0" },
+            { "Amadeus:ClientMetaData:ClientName", "tests" },
         }!)
         .AddUserSecrets(Assembly.GetExecutingAssembly(), true, false)
         .Build();

@@ -1,5 +1,7 @@
 using Amadeus.Net.Clients;
 using Amadeus.Net.Clients.Response;
+using Amadeus.Net.HttpClientExtensions;
+using Amadeus.Net.Options;
 using LanguageExt;
 
 namespace Amadeus.Net.ApiContext;
@@ -17,4 +19,10 @@ public delegate IO<Either<ErrorResponse, R>> GetOperation<in Q, R>(Q query) wher
 /// </summary>
 /// <typeparam name="Q">The type of query. Must implement IQuery.</typeparam>
 /// <typeparam name="R">The type of response.</typeparam>
-public readonly record struct Endpoint<Q, R>(GetOperation<Q, R> Get) where Q : IQuery;
+public readonly record struct Endpoint<Q, R>(GetOperation<Q, R> GetFn) where Q : IQuery;
+
+public static class Endpoint
+{
+    public static Endpoint<Q, R> Create<Q, R>(HttpClient httpClient, ClientMetaData clientMetaData, string path) where Q : IQuery =>
+        new(GetFn: query => httpClient.Get<Q, R>(clientMetaData, path, query));
+}

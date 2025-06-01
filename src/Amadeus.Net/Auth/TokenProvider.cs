@@ -1,6 +1,6 @@
-﻿using Amadeus.Net.Locks;
+﻿using Amadeus.Net.HttpClientExtensions;
+using Amadeus.Net.Locks;
 using Amadeus.Net.Options;
-using Amadeus.Net.HttpClientExtensions;
 using System.Net.Http.Headers;
 using System.Runtime.CompilerServices;
 using System.Text.Json;
@@ -124,7 +124,7 @@ internal sealed class TokenProvider(
     private HttpRequestMessage BuildRequest(FormUrlEncodedContent content) =>
         new HttpRequestMessageBuilder(HttpMethod.Post, new Uri(TokenPath, UriKind.Relative))
             .WithContent(content)
-            .WithUserAgent(options.ClientName, options.ClientVersion.ToString())
+            .WithUserAgent(options.ClientMetaData.ClientName, options.ClientMetaData.ClientVersion.ToString())
             .WithUserAgent("dotnet", "9")
             .Accept("application/vnd.amadeus+json")
             .Accept("application/json")

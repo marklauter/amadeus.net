@@ -4,8 +4,7 @@ namespace Amadeus.Net.Options;
 
 public sealed record AmadeusOptions(
     [Required] Uri Host,
-    [Required] Version ClientVersion,
-    [Required] string ClientName)
+    [Required] ClientMetaData ClientMetaData)
 {
     public const string SectionName = "Amadeus";
 }

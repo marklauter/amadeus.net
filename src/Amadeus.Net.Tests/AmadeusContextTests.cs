@@ -11,8 +11,8 @@ public class AmadeusContextTests
         .AddInMemoryCollection(new Dictionary<string, string>
         {
             { "Amadeus:Host", "https://test.api.amadeus.com" },
-            { "Amadeus:ClientVersion", "0.0.0" },
-            { "Amadeus:ClientName", "TWAI" },
+            { "Amadeus:ClientMetaData:ClientVersion", "0.0.0" },
+            { "Amadeus:ClientMetaData:ClientName", "TWAI" },
         }!)
         .AddUserSecrets(Assembly.GetExecutingAssembly(), true, false)
         .Build();

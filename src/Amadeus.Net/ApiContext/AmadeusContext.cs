@@ -12,20 +12,16 @@ public sealed class AmadeusContext(
     HttpClient httpClient,
     AmadeusOptions options)
 {
-    private readonly Lazy<Endpoint<AirlineCodeQuery, AirlineLookupResponse>> airlines =
-        new(() => AirlineCodeLookupClient.CreateEndpoint(httpClient, options));
-    public Endpoint<AirlineCodeQuery, AirlineLookupResponse> Airlines => airlines.Value;
+    public Endpoint<AirlineCodeQuery, AirlineLookupResponse> Airlines { get; } =
+        AirlineCodeLookupClient.CreateEndpoint(httpClient, options.ClientMetaData);
 
-    private readonly Lazy<Endpoint<FlightInspirationQuery, FlightInspirationResponse>> flightInspirations =
-        new(() => FlightInspirationClient.CreateEndpoint(httpClient, options));
-    public Endpoint<FlightInspirationQuery, FlightInspirationResponse> FlightInspirations => flightInspirations.Value;
+    public Endpoint<FlightInspirationQuery, FlightInspirationResponse> FlightInspirations { get; } =
+        FlightInspirationClient.CreateEndpoint(httpClient, options.ClientMetaData);
 
-    private readonly Lazy<Endpoint<AirportCityQuery, AirportCitySearchResponse>> airportCities =
-        new(() => AirportCitySearchClient.CreateSearchEndpoint(httpClient, options));
-    public Endpoint<AirportCityQuery, AirportCitySearchResponse> AirportCities => airportCities.Value;
+    public Endpoint<AirportCityQuery, AirportCitySearchResponse> AirportCities { get; } =
+        AirportCitySearchClient.CreateSearchEndpoint(httpClient, options.ClientMetaData);
 
-    private readonly Lazy<Endpoint<LocationId, Location>> airportCity =
-        new(() => AirportCitySearchClient.CreateLocationEndpoint(httpClient, options));
-    public Endpoint<LocationId, Location> AirportCity => airportCity.Value;
+    public Endpoint<LocationId, Location> AirportCity { get; } =
+        AirportCitySearchClient.CreateLocationEndpoint(httpClient, options.ClientMetaData);
 }
 
