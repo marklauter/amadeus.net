@@ -8,5 +8,5 @@ internal sealed class AirlineCodeLookup
     private const string Path = "/v1/reference-data/airlines";
 
     public static Endpoint<AirlineCodeQuery, AirlineLookupResponse> CreateEndpoint(HttpClient httpClient, ClientMetaData clientMetaData) =>
-        Endpoint.Create<AirlineCodeQuery, AirlineLookupResponse>(httpClient, clientMetaData, Path);
+        Endpoint.MakeGet<AirlineCodeQuery, AirlineLookupResponse>(httpClient, clientMetaData, Path);
 }

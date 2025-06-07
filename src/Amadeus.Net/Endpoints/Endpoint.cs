@@ -21,6 +21,10 @@ public delegate IO<Either<ErrorResponse, R>> GetOperation<in Q, R>(Q query) wher
 /// <typeparam name="R">The type of response.</typeparam>
 public readonly record struct Endpoint<Q, R>(GetOperation<Q, R> Get) where Q : IQuery;
 
+public delegate IO<Either<ErrorResponse, R>> PostOperation<R>(HttpContent content);
+
+public readonly record struct Endpoint<R>(PostOperation<R> Post);
+
 /// <summary>
 /// Provides factory methods for creating endpoint instances for specific query and response types. 
 /// These endpoints execute operations and wrap their execution in an IO monad to support deferred execution.
@@ -37,6 +41,9 @@ public static class Endpoint
     /// <param name="clientMetaData">Metadata required by the client for authentication and request configuration.</param>
     /// <param name="path">The endpoint path used to compose the GET request.</param>
     /// <returns>An <see cref="Endpoint{Q, R}"/> instance encapsulating the GET operation.</returns>
-    public static Endpoint<Q, R> Create<Q, R>(HttpClient httpClient, ClientMetaData clientMetaData, string path) where Q : IQuery =>
+    public static Endpoint<Q, R> MakeGet<Q, R>(HttpClient httpClient, ClientMetaData clientMetaData, string path) where Q : IQuery =>
         new(Get: query => httpClient.Get<Q, R>(clientMetaData, path, query));
+
+    public static Endpoint<R> MakePost<R>(HttpClient httpClient, ClientMetaData clientMetaData, string path) =>
+        new(Post: content => httpClient.Post<R>(clientMetaData, path, content));
 }

@@ -3,6 +3,7 @@ using LanguageExt;
 using System.Diagnostics.CodeAnalysis;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Text.Json;
 
@@ -43,27 +44,32 @@ public sealed class HttpRequestMessageBuilder(
     {
     }
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public HttpRequestMessageBuilder WithMethod(HttpMethod method)
     {
         request.Method = method ?? throw new ArgumentNullException(nameof(method));
         return this;
     }
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public HttpRequestMessageBuilder WithUri(Uri uri)
     {
         request.RequestUri = uri ?? throw new ArgumentNullException(nameof(uri));
         return this;
     }
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public HttpRequestMessageBuilder WithQueryParameter(string key, string value) =>
         WithQueryParameter(QueryParameter.Create(key, value));
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public HttpRequestMessageBuilder WithQueryParameter(QueryParameter parameter)
     {
         queryParameters.Add(parameter);
         return this;
     }
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public HttpRequestMessageBuilder WithQueryParameters(params QueryParameter[] query)
     {
         if (query.Length > 0)
@@ -72,6 +78,7 @@ public sealed class HttpRequestMessageBuilder(
         return this;
     }
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public HttpRequestMessageBuilder WithQueryParameters(Seq<QueryParameter> query)
     {
         if (query.Any())
@@ -80,6 +87,7 @@ public sealed class HttpRequestMessageBuilder(
         return this;
     }
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public HttpRequestMessageBuilder WithHeader(string key, string value)
     {
         ArgumentException.ThrowIfNullOrEmpty(key);
@@ -89,6 +97,7 @@ public sealed class HttpRequestMessageBuilder(
         return this;
     }
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public HttpRequestMessageBuilder WithHeaders(params KeyValuePair<string, string>[] headers)
     {
         if (headers.Length == 0)
@@ -105,6 +114,7 @@ public sealed class HttpRequestMessageBuilder(
         return this;
     }
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public HttpRequestMessageBuilder WithAuthorizationHeader(string scheme, string parameter)
     {
         ArgumentException.ThrowIfNullOrEmpty(scheme, nameof(scheme));
@@ -114,6 +124,7 @@ public sealed class HttpRequestMessageBuilder(
         return this;
     }
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public HttpRequestMessageBuilder WithContent(HttpContent content)
     {
         request.Content = request.Content is not null
@@ -123,12 +134,14 @@ public sealed class HttpRequestMessageBuilder(
         return this;
     }
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public HttpRequestMessageBuilder WithFormContent(params KeyValuePair<string, string>[] formData) =>
         formData.Length == 0
         ? this
         : WithContent(new FormUrlEncodedContent(formData));
 
     [SuppressMessage("IDisposableAnalyzers.Correctness", "IDISP001:Dispose created", Justification = "multipartContent is added to request")]
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public HttpRequestMessageBuilder WithMultipartContent(params HttpContent[] contents)
     {
         if (contents.Length == 0)
@@ -144,15 +157,18 @@ public sealed class HttpRequestMessageBuilder(
         return WithContent(multipartContent);
     }
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public HttpRequestMessageBuilder WithStringContent(
         string content) =>
         WithStringContent(content, Encoding.UTF8);
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public HttpRequestMessageBuilder WithStringContent(
         string content,
         Encoding encoding) =>
         WithStringContent(content, encoding, "text/plain");
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public HttpRequestMessageBuilder WithStringContent(
         string content,
         Encoding encoding,
@@ -165,6 +181,7 @@ public sealed class HttpRequestMessageBuilder(
         return WithContent(new StringContent(content, encoding, mediaType));
     }
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public HttpRequestMessageBuilder WithJsonContent<T>(
         T content)
     {
@@ -173,6 +190,7 @@ public sealed class HttpRequestMessageBuilder(
         return WithContent(JsonContent.Create(content));
     }
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public HttpRequestMessageBuilder WithJsonContent<T>(
         T content,
         JsonSerializerOptions options)
@@ -183,6 +201,7 @@ public sealed class HttpRequestMessageBuilder(
         return WithContent(JsonContent.Create(content, options: options));
     }
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public HttpRequestMessageBuilder WithCookie(string name, string value)
     {
         var cookies = CreateCookie(ValidateCookie(KeyValuePair.Create(name, value)));
@@ -196,12 +215,14 @@ public sealed class HttpRequestMessageBuilder(
         return this;
     }
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public HttpRequestMessageBuilder WithCookies(Seq<KeyValuePair<string, string>> cookies) =>
         cookies.Match(
             Empty: () => this,
             Seq: cookies =>
                 ReplaceCookies(GetUpdatedCookies(AsCookiesString(cookies))));
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private HttpRequestMessageBuilder ReplaceCookies(string newCookies)
     {
         _ = request.Headers.Remove("Cookie");
@@ -209,19 +230,23 @@ public sealed class HttpRequestMessageBuilder(
         return this;
     }
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private string GetUpdatedCookies(string newCookies) =>
         request.Headers.TryGetValues("Cookie", out var existingCookies)
         ? $"{existingCookies.First()}; {newCookies}"
         : newCookies;
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private static string AsCookiesString(Seq<KeyValuePair<string, string>> cookies) =>
         string.Join("; ", cookies
             .Select(ValidateCookie)
             .Select(CreateCookie));
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private static string CreateCookie(KeyValuePair<string, string> cookie) =>
         $"{Uri.EscapeDataString(cookie.Key)}={Uri.EscapeDataString(cookie.Value)}";
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private static KeyValuePair<string, string> ValidateCookie(KeyValuePair<string, string> cookie)
     {
         ArgumentException.ThrowIfNullOrEmpty(cookie.Key);
@@ -232,6 +257,7 @@ public sealed class HttpRequestMessageBuilder(
             : cookie;
     }
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public HttpRequestMessageBuilder WithUserAgent(string name, string version)
     {
         ArgumentException.ThrowIfNullOrEmpty(name);
@@ -240,6 +266,7 @@ public sealed class HttpRequestMessageBuilder(
         return this;
     }
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public HttpRequestMessageBuilder WithOrigin(string origin)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(origin);
@@ -248,6 +275,7 @@ public sealed class HttpRequestMessageBuilder(
         return this;
     }
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public HttpRequestMessageBuilder WithCacheControl(string cacheControl)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(cacheControl);
@@ -256,6 +284,7 @@ public sealed class HttpRequestMessageBuilder(
         return this;
     }
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public HttpRequestMessageBuilder WithCacheControl(CacheType cacheType, TimeSpan? duration = null)
     {
         request.Headers.CacheControl ??= new CacheControlHeaderValue();
@@ -295,6 +324,7 @@ public sealed class HttpRequestMessageBuilder(
         return this;
     }
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public HttpRequestMessageBuilder WithReferer(string referer)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(referer);
@@ -303,6 +333,7 @@ public sealed class HttpRequestMessageBuilder(
         return this;
     }
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public HttpRequestMessageBuilder Accept(string mediaType)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(mediaType);
@@ -311,6 +342,7 @@ public sealed class HttpRequestMessageBuilder(
         return this;
     }
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public HttpRequestMessageBuilder AcceptLanguage(string language)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(language);
@@ -319,6 +351,7 @@ public sealed class HttpRequestMessageBuilder(
         return this;
     }
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public HttpRequestMessageBuilder AcceptEncoding(string encoding)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(encoding);
@@ -327,6 +360,7 @@ public sealed class HttpRequestMessageBuilder(
         return this;
     }
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public HttpRequestMessage Build()
     {
         if (queryParameters is { Count: > 0 })

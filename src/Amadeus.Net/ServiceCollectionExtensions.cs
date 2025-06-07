@@ -1,5 +1,5 @@
-﻿using Amadeus.Net.Context;
-using Amadeus.Net.Auth;
+﻿using Amadeus.Net.Auth;
+using Amadeus.Net.Context;
 using Amadeus.Net.Options;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -25,6 +25,7 @@ public static class ServiceCollectionExtensions
         _ = services
             .AddSingleton(options)
             .AddSingleton(credentials)
+            .AddSingleton(options.ClientMetaData)
             .AddTransient<AuthTokenHandler>();
 
         _ = services
