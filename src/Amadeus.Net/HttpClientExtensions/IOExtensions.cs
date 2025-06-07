@@ -9,4 +9,9 @@ public static class IOExtensions
         this IO<Either<ErrorResponse, R>> operation,
         CancellationToken cancellationToken) =>
             operation.RunAsync(EnvIO.New(token: cancellationToken));
+
+    public static Either<ErrorResponse, R> Invoke<R>(
+        this IO<Either<ErrorResponse, R>> operation,
+        CancellationToken cancellationToken) =>
+            operation.Run(EnvIO.New(token: cancellationToken));
 }
