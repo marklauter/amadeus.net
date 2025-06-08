@@ -40,4 +40,8 @@
 	  </None>
 	</ItemGroup>
 
+	<ItemGroup>
+	  <Folder Include="Endpoints\AirlineRoutes\Response\" />
+	</ItemGroup>
+
 </Project>
