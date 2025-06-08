@@ -24,5 +24,8 @@ public sealed class AmadeusContext(
 
     public Endpoint<LocationId, Location> AirportCity { get; } =
         AirportCitySearch.CreateLocationEndpoint(httpClient, options.ClientMetaData);
+
+    public Endpoint<AirlineRoutesQuery, AirlineRoutesResponse> AirlineRoutes { get; } =
+        AirlineRoutes.CreateEndpoint(httpClient, options.ClientMetaData);
 }
 
