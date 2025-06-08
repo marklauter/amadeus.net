@@ -5,5 +5,4 @@ namespace Amadeus.Net.Endpoints.AirportCitySearch.Response;
 public sealed record Area(
     [property: JsonPropertyName("name")] string? Name,
     [property: JsonPropertyName("code")] string? Code,
-    [property: JsonPropertyName("locationCode")] string? LocationCode
-);
+    [property: JsonPropertyName("locationCode")] string? LocationCode);

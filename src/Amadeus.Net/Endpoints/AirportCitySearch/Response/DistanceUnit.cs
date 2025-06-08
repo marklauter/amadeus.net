@@ -1,5 +1,5 @@
-using System.Text.Json.Serialization;
 using System.Runtime.Serialization;
+using System.Text.Json.Serialization;
 
 namespace Amadeus.Net.Endpoints.AirportCitySearch.Response;
 
@@ -7,7 +7,7 @@ namespace Amadeus.Net.Endpoints.AirportCitySearch.Response;
 public enum DistanceUnit
 {
     [EnumMember(Value = "KM")]
-    Kil,
+    Kilometers,
     [EnumMember(Value = "MI")]
     Miles
 }

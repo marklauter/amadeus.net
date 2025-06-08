@@ -1,7 +1,7 @@
 using System.Runtime.Serialization;
 using System.Text.Json.Serialization;
 
-namespace Amadeus.Net.Endpoints.AirportCitySearch.Response;
+namespace Amadeus.Net.Endpoints.AirportCitySearch;
 
 [JsonConverter(typeof(JsonStringEnumConverter))]
 public enum LocationType

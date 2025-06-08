@@ -9,9 +9,3 @@ public sealed record Warning(
     [property: JsonPropertyName("detail")] string? Detail,
     [property: JsonPropertyName("source")] WarningSource? Source
 );
-
-public sealed record WarningSource(
-    [property: JsonPropertyName("parameter")] string? Parameter,
-    [property: JsonPropertyName("example")] string? Example
-);
-

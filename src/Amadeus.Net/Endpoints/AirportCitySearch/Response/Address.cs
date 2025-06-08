@@ -8,5 +8,4 @@ public sealed record Address(
     [property: JsonPropertyName("countryName")] string? CountryName,
     [property: JsonPropertyName("countryCode")] string? CountryCode,
     [property: JsonPropertyName("stateCode")] string? StateCode,
-    [property: JsonPropertyName("regionCode")] string? RegionCode
-);
+    [property: JsonPropertyName("regionCode")] string? RegionCode);
