@@ -1,6 +1,8 @@
 using Amadeus.Net.Endpoints;
 using Amadeus.Net.Endpoints.AirlineCodeLookup;
 using Amadeus.Net.Endpoints.AirlineCodeLookup.Response;
+using Amadeus.Net.Endpoints.AirlineRoutes;
+using Amadeus.Net.Endpoints.AirlineRoutes.Response;
 using Amadeus.Net.Endpoints.AirportCitySearch;
 using Amadeus.Net.Endpoints.AirportCitySearch.Response;
 using Amadeus.Net.Endpoints.FlightInspiration;
@@ -22,10 +24,10 @@ public sealed class AmadeusContext(
     public Endpoint<AirportCityQuery, AirportCitySearchResponse> AirportCities { get; } =
         AirportCitySearch.CreateSearchEndpoint(httpClient, options.ClientMetaData);
 
-    public Endpoint<LocationId, Location> AirportCity { get; } =
+    public Endpoint<LocationId, Endpoints.AirportCitySearch.Response.Location> AirportCity { get; } =
         AirportCitySearch.CreateLocationEndpoint(httpClient, options.ClientMetaData);
 
     public Endpoint<AirlineRoutesQuery, AirlineRoutesResponse> AirlineRoutes { get; } =
-        AirlineRoutes.CreateEndpoint(httpClient, options.ClientMetaData);
+        Endpoints.AirlineRoutes.AirlineRoutes.CreateEndpoint(httpClient, options.ClientMetaData);
 }
 
