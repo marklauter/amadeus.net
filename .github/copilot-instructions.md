@@ -1,7 +1,8 @@
- - we're using dotnet 9
- - we're using C# 13
- - we're using the language-ext (LanguageExt) library version 5
- - my testing framework is xUnit
+ - use dotnet 9
+ - use C# 13
+ - use the language-ext (LanguageExt) library version 5
+ - do not use language-ext vesion 4 because it is deprecated
+ - use the xUnit testing framework
  - prefer empty collection
  - prefer var
  - prefer immutability
