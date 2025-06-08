@@ -6,7 +6,7 @@ using System.Globalization;
 namespace Amadeus.Net.Endpoints.FlightInspiration;
 
 public sealed record FlightInspirationQuery(
-    IataCode Origin,
+    IataLocationCode Origin,
     Option<TravelDates> TravelDates,
     Option<bool> OneWay,
     Option<int> TripDurationDays,
@@ -14,7 +14,7 @@ public sealed record FlightInspirationQuery(
     Option<int> MaxPrice)
     : IQuery
 {
-    public static FlightInspirationQuery From(IataCode origin) => new(
+    public static FlightInspirationQuery From(IataLocationCode origin) => new(
         origin,
         Option<TravelDates>.None,
         Option<bool>.None,
