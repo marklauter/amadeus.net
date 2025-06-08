@@ -19,4 +19,5 @@ public sealed record Location(
     [property: JsonPropertyName("relevance")] double? Relevance,
     [property: JsonPropertyName("category")] string? Category,
     [property: JsonPropertyName("tags")] IReadOnlyList<string>? Tags,
-    [property: JsonPropertyName("rank")] string? Rank);
+    [property: JsonPropertyName("rank")] string? Rank,
+    [property: JsonPropertyName("area")] Area? Area);
