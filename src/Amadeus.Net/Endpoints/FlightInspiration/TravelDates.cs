@@ -11,5 +11,5 @@ public sealed record TravelDates(
 
     public override string ToString() => Return.Match(
         Some: r => $"{Departure:yyyy-MM-dd},{r:yyyy-MM-dd}",
-        None: $"{Departure:yyyy-MM-dd}");
+        None: () => $"{Departure:yyyy-MM-dd}");
 }

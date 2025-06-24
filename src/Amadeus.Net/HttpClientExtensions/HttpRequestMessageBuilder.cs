@@ -30,7 +30,7 @@ public sealed class HttpRequestMessageBuilder(
     [SuppressMessage("IDisposableAnalyzers.Correctness", "IDISP004:Don't ignore created IDisposable", Justification = "it's not ignored")]
     private readonly HttpRequestMessage request = uri.Match(
         Some: uri => new HttpRequestMessage(method ?? throw new ArgumentNullException(nameof(method)), uri),
-        None: new HttpRequestMessage(method ?? throw new ArgumentNullException(nameof(method)), (string?)null));
+        None: () => new HttpRequestMessage(method ?? throw new ArgumentNullException(nameof(method)), (string?)null));
 
     private readonly List<QueryParameter> queryParameters = [];
 
